@@ -1,0 +1,260 @@
+; ^  is  ctrl
+; +  is  shift
+; !  is  alt
+; ^  is  ctrl
+; #  is  win
+
+; OSCombine Key must use { }  such as ctrl+home  )
+; home end 
+; left right up down
+    ; eg1: "^{home}" is  ctrl+home
+    ; eg2: "^u"      is  ctrl+u   
+
+; AutoHotKey Can't Work  WindowsTerminal Well
+; So  If Not WindowsTerminal, Then All Works 
+
+#HotIf not WinActive("ahk_exe WindowsTerminal.exe")
+
+; [Remap]
++u::
+{
+    Send "+["
+} 
++i::
+{
+    Send "+]"
+} 
+
++j::
+{
+    Send "["
+} 
++k::
+{
+    Send "]"
+} 
+
++f::
+{
+    Send "+'"
+}
++c::
+{
+    Send "'"
+}
++g::
+{
+    Send "-"
+}
++n::
+{
+    Send "+-"
+}
+
++l::
+{
+    Send "="
+} 
++h::
+{
+    Send "+="
+}
+
++v::
+{
+    Send "\"
+}
++b::
+{
+    Send "+\"
+}
+!;::
+{
+    Send "{enter}" 
+}
+!space::
+{
+    Send "{enter}" 
+}
+^space::
+{
+    Send "^{enter}" 
+}
+
+; [Undo]
+
+!u::
+{
+    Send "^z"
+}
+
+!+u::
+{
+    Send "^+z"
+}
+
+; [Delete]
+
+!o::
+{
+    Send "{backspace}"
+}
+
+!i::
+{
+    Send "^{backspace}"
+}
+
+^i::
+{
+    Send "^{backspace}"
+}
+
+^u::
+{
+    Send "+{home}{backspace}"
+}
+
+^k::
+{
+    Send "+{end}{backspace}"
+}
+
+; [Copy & Paste]
+!c::
+{
+    Send "^c"
+}
+!v::
+{
+    Send "^v"
+}
+
+; [MoveMent]
+
+!j::
+{
+    Send "{left}"
+}
+
+!k::
+{
+    Send "{right}"
+}
+
+!n::
+{
+    Send "{down}"
+}
+
+!p::
+{
+    Send "{up}"
+}
+
+!b::
+{
+    Send "^{left}"
+}
+
+!f::
+{
+    Send "^{right}"
+}
+
+!h::
+{
+    Send "{home}"
+}
+
+!l::
+{
+    Send "{end}"
+}
+
+^!n::
+{
+    Send "^{end}"
+}
+
+^!p::
+{
+    Send "^{home}"
+}
+
+; [Select]
+
+!+j::
+{
+    Send "+{left}"
+}
+
+!+k::
+{
+    Send "+{right}"
+}
+
+!+n::
+{
+    Send "+{down}"
+}
+
+!+p::
+{
+    Send "+{up}"
+}
+
+!+h::
+{
+    Send "+{home}"
+}
+
+!+l::
+{
+    Send "+{end}"
+}
+
+!+b::
+{
+    Send "^+{left}"
+}
+
+!+f::
+{
+    Send "^+{right}"
+}
+
+!a::
+{
+    Send "^+{home}"
+}
+
+!d::
+{
+    Send "^{left}^+{right}"
+}
+
+; [Screen In WindowOS]
+^!j::
+{
+    Send "^#{left}"
+}
+^!k::
+{
+    Send "^#{right}"
+}
++o::
+{
+    Send "^!{tab}"
+}  
++m::
+{
+    Send "{esc}"
+} 
+
+!m::
+{
+    Send "{esc}"
+} 
+
+#HotIf
