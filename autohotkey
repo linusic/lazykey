@@ -231,6 +231,11 @@
 }
 
 ; [Screen In WindowOS]
+^+space::
+{
+    Send "{F11}"
+}
+
 ^!j::
 {
     Send "^#{left}"
