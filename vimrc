@@ -313,6 +313,6 @@ endfunction
 :imap <A-m> <CR>
 
 """ python
-:map  <buffer> <C-b> :exec '!python' shellescape(@%, 1)<cr>
-:imap <buffer> <C-b> <ESC>:exec '!python' shellescape(@%, 1)<cr>
-:cmap <buffer> <C-b> <ESC>:exec '!python' shellescape(@%, 1)<cr>
+:map  <buffer> <C-b> :w<CR>:exec '!python3' shellescape(@%, 1)<c    r>
+:imap <buffer> <C-b> <ESC>:w<CR>:<ESC>:exec '!python3' shellesca    pe(@%, 1)<cr>
+:cmap <buffer> <C-b> <ESC>:w<CR>:<ESC>:exec '!python3' shellesca    pe(@%, 1)<cr>
