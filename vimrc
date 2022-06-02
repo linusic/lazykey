@@ -311,3 +311,8 @@ endfunction
 """ Enter
 :map  <A-m> <CR>
 :imap <A-m> <CR>
+
+""" python
+:map  <buffer> <C-b> :exec '!python' shellescape(@%, 1)<cr>
+:imap <buffer> <C-b> <ESC>:exec '!python' shellescape(@%, 1)<cr>
+:cmap <buffer> <C-b> <ESC>:exec '!python' shellescape(@%, 1)<cr>
