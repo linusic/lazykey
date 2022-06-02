@@ -65,6 +65,11 @@ let g:fzf_preview_window = []
 :imap <F4> <ESC>:qall!<CR>
 :cmap <F4> <ESC>:qall!<CR>
 
+"""""" Close Single Buffer
+:map  <F6> :bd<CR>
+:imap <F6> <ESC>:bd<CR>
+:cmap <F6> <ESC>:bd<CR>
+
 """""" New Tab With Name
 :map  <C-t> :tabe<SPACE>
 :imap <C-t> <RIGHT><ESC>:tabe<SPACE>
