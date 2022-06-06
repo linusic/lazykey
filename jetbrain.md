@@ -41,3 +41,4 @@
 | Alt + -                        | Alt + m                       |
 | Alt + shift+ -                        | Alt + ,               |
 | Expend Live Template                        | Shift+Space  / Tab      |
+| parameter info                        | Ctrl+,      |
