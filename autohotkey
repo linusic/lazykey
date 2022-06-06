@@ -68,11 +68,11 @@
 {
     Send "+\"
 }
-!;::
+!space::
 {
     Send "{enter}" 
 }
-!space::
+!;::
 {
     Send "^{enter}" 
 }
