@@ -117,6 +117,10 @@
 }
 
 ; [Copy & Paste]
+!x::
+{
+    Send "^x"
+}
 !c::
 {
     Send "^c"
