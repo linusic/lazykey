@@ -69,3 +69,8 @@
 // just replace  'enter \n'
 { "keys": ["alt+space"], "command": "insert", "args": {"characters": "\n"} },
 // ------------------------ Key Bindings ------------------------ //
+
+
+// swap line
+{ "keys": ["ctrl+alt+shift+p"], "command": "swap_line_up" },
+{ "keys": ["ctrl+alt+shift+n"], "command": "swap_line_down" },
