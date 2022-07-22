@@ -144,7 +144,7 @@
 
 !,::
 {
-    Send "!v"
+    Send "^v"
 }
 
 ; [MoveMent]
