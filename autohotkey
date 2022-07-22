@@ -142,6 +142,11 @@
     Send "^v"
 }
 
+!,::
+{
+    Send "!v"
+}
+
 ; [MoveMent]
 
 !j::
@@ -243,7 +248,7 @@
 
 !d::
 {
-    Send "^{left}^+{right}"
+    Send "^{left}^+{right}^c"
 }
 
 ; [Screen In WindowOS]
