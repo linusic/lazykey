@@ -1,0 +1,74 @@
+{
+    "security.workspace.trust.untrustedFiles": "open",
+    "remote.WSL.debug": true,
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        },
+        "Command Prompt": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe",
+                "${env:windir}\\System32\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        },
+        "Git Bash": {
+            "source": "Git Bash"
+        },
+        "Ubuntu (WSL)": {
+            "path": "C:\\Windows\\System32\\wsl.exe",
+            "args": [
+                "-d",
+                "Ubuntu"
+            ]
+        },
+        "pwsh": {
+            "path": "C:\\powershell\\pwsh.exe"
+        },
+    },
+    // "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "terminal.integrated.defaultProfile.windows": "pwsh",
+    "code-runner.runInTerminal": true,
+    "code-runner.languageIdToFileExtensionMap": {
+    
+        "bat": ".bat",
+        "powershell": ".ps1",
+        "typescript": ".ts"
+    },
+
+    "code-runner.executorMap": {
+        // -u    translate from a Windows path to a WSL path (default)
+        // -w    translate from a WSL path to a Windows path
+        // "javascript": "/usr/local/lib/nodejs/node-v16.13.1-linux-x64/bin/node $(wslpath -u $fullFileName)",
+    },
+    "[python]": {
+        "editor.formatOnType": true
+    },
+    "terminal.integrated.cwd": "d:/test",
+    "code-runner.defaultLanguage": "python",
+    "workbench.editor.untitled.hint": "hidden",
+    "extensions.autoUpdate": false,
+    "update.mode": "manual",
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "terminal.external.windowsExec": "C:\\powershell\\pwsh.exe",
+    "terminal.integrated.shell.windows": "C:\\powershell\\pwsh.exe",
+    "terminal.integrated.automationProfile.linux": {
+    
+    },
+    "editor.mouseWheelZoom": true,
+    "editor.detectIndentation": false,
+    "python.defaultInterpreterPath": "D:\\python310\\python.exe",
+    "workbench.colorTheme": "Default Dark+",
+    "tabnine.experimentalAutoImports": true,
+
+    
+    "terminal.integrated.cwd": "${workspaceFolder}",
+    "typescript.tsserver.watchOptions": {
+        
+    }
+    
+}

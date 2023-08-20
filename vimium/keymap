@@ -1,0 +1,43 @@
+mapkey <a-,> <c-[>
+# map <c-]> passNextKey
+
+map n scrollDown
+map p scrollUp
+
+map yy copyCurrentUrl
+map yp openCopiedUrlInNewTab
+
+map cs closeOtherTabs
+
+map j previousTab
+map k nextTab
+
+map h goBack
+map l goForward
+
+map < moveTabLeft
+map	> moveTabRight
+
+map N performFind
+map P  performBackwardsFind
+# map <a-n>  performFind
+# map <a-p>  performBackwardsFind
+
+map w moveTabToNewWindow
+
+# ge Edit the current URL
+# gE Edit the current URL and open in a new tab
+
+# move current tab to first loc
+# alt+p  
+
+# m (default: create tag)
+# ` (default: go to tag,  Only in same tab)
+
+# remap and drop it 
+map  <A-y> toggleMuteTab
+
+# Marks.activateCreateMode
+unmap m
+# Marks.activateGotoMode
+unmap `

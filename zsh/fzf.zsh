@@ -1,0 +1,1 @@
+export FZF_DEFAULT_OPTS='--multi --reverse --bind ctrl-a:select-all,ctrl-e:deselect-all,alt-n:down,alt-p:up,alt-o:backward-delete-char,alt-h:beginning-of-line,alt-l:end-of-line,alt-j:backward-char,alt-k:forward-char,alt-b:backward-word,alt-f:forward-word --height 95% --layout reverse --border --preview "bat --style=numbers --color=always --line-range :500 {}"'

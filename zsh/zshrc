@@ -1,0 +1,222 @@
+# Zsh prompt always at bottom (Must be in front of Instant Prompt)
+printf '\n%.0s' {1..100}  
+alias clear="clear && printf '\n%.0s' {1..100}"
+always_bottom() {
+    clear && printf '\n%.0s' {1..100}
+    zle accept-line
+}
+
+zle     -N    always_bottom
+bindkey '^l'  always_bottom 
+
+# if Bash (not support Ctrl+L)
+# printf '\n%.0s' {1..100}
+# alias clear="clear && printf '\n%.0s' {1..100}"
+
+
+# Instant Prompt  (Must be head line)
+(( ${+commands[direnv]} )) && emulate zsh -c "$(direnv export zsh)"
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+(( ${+commands[direnv]} )) && emulate zsh -c "$(direnv hook zsh)"
+
+
+# High Delay
+export ZSH="/root/.oh-my-zsh"
+source $ZSH/oh-my-zsh.sh
+
+# ZSH_THEME="jonathan"
+ZSH_THEME="powerlevel10k/powerlevel10k" 
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+
+plugins=(
+	# git
+	zsh-autosuggestions
+	zsh-syntax-highlighting
+	autojump
+)
+
+
+# Key
+setopt nonomatch  # support *
+# https://zsh.sourceforge.io/Doc/Release/Zsh-Line-Editor.html#Standard-Widgets
+
+### only need to set undo and redo (others were replaced by AutoHotKey)
+bindkey '^[u' undo                  # alt+u
+bindkey '^[U' redo                  # alt+shift+u
+
+### Below all keys Replace by AHK
+# bindkey '^[o' backward-delete-char  # Alt+o
+# bindkey '^[i' backward-delete-word  # Alt+i
+# bindkey \^U backward-kill-line      # ctrl + U
+# bindkey \^K kill-line               # ctrl + K
+# bindkey '^[h' beginning-of-line     # Alt+h
+# bindkey '^[l' end-of-line           # Alt+l 
+# bindkey '^[j' backward-char         # Alt+j
+# bindkey '^[k' forward-char          # Alt+k 
+# bindkey '^[b' backward-word         # Alt+b
+# bindkey '^[f' forward-word          # Alt+f
+# bindkey '^[p' up-line-or-history    # Alt+p
+# bindkey '^[n' down-line-or-history  # Alt+n
+# bindkey '^[;' accept-line           # alt+;
+
+
+
+### LANG-ZH_CN (High Delay)
+# export GTK_IM_MODULE=fcitx
+# export QT_IM_MODULE=fcitx
+# export XMODIFIERS=@im=fcitx
+# export DefaultIMModule=fcitx
+# fcitx-autostart &>/dev/null
+
+
+alias cat="lolcat"
+
+
+# not work
+# solve 
+
+# not work
+# make cd use the ls colours
+# zstyle ':completion:*' list-colors "${(@s.:.)LS_COLORS}"
+# autoload -Uz compinit
+# compinit
+
+# work
+LS_COLORS="ow=01;36;40" && export LS_COLORS
+
+# alias l="colorls --sd -X"
+alias ls="colorls --sd -X"
+alias l1="colorls --sd -X -1"
+alias ld="colorls --sd -X -d"
+alias lf="colorls --sd -X -f"
+alias ll="colorls --sd -X -lA"
+
+alias lr="colorls --sd -X --report"
+alias lt="colorls --sd -X --tree"    # alias lt="colorls --sd --tree=3"
+
+alias lh="colorls --help"
+
+
+
+# TaskMgr
+alias sm="gnome-system-monitor"
+
+# wttr
+# alias w="zsh ~/.weather.sh"
+
+alias wifi="netsh.exe wlan show profiles name=ifconfig key=clear"
+
+alias subl="subl.exe"
+# alias sm="/mnt/d/ide/Sublime-Merge/sublime_merge.exe"
+alias t="/mnt/d/ide/sublime_wsl/sublime_text"
+alias ta="/mnt/e/app/Typora/Typora.exe"
+alias va="find . -name '.?*' -prune -o -type f -exec vim {} +"
+
+alias conda="cmd.exe "/K" D:/miniconda/Scripts/activate.bat D:/miniconda"
+
+alias e=/mnt/c/Windows/explorer.exe
+alias edge="/mnt/c/Program\ Files\ \(x86\)/Microsoft/Edge/Application/msedge.exe --start-fullscreen"
+alias s="/mnt/c/Program\ Files/Google/Chrome/Application/chrome.exe"
+alias wsl="wsl.exe"
+alias p="/mnt/d/pwsh/pwsh.exe /nologo"
+alias c="/mnt/c/Windows/system32/clip.exe"
+alias pa="powershell.exe -command 'Get-Clipboard'"
+
+alias n="nautilus"
+
+
+# for clash(windows)
+alias va="python.exe D:/lab/vultr/vultr/vultr.py"
+alias vultr="/usr/bin/python /mnt/d/lab/vultr/vultr/vultr.py"
+
+alias jl="jupyter lab --no-browser"
+
+# Node
+export PATH="/usr/local/lib/nodejs/node-v16.13.1-linux-x64/bin/:$PATH"
+# Jupyter+PM2
+alias jl='pm2 start "jupyter lab --no-browser --allow-root" --name jl'
+
+alias java="java.exe"
+alias scala="cmd.exe /C scala.bat"
+alias scalac="cmd.exe /C scalac.bat"
+
+### for fdfind and bat
+export PATH="$PATH:/root/.local/bin"
+
+### FZF
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# default is ** 
+export FZF_COMPLETION_TRIGGER=';'
+# ps ; <TAB>
+# ssh; <TAB>
+# ...
+
+# CTRL+T
+# CTRL+R
+# ALT+C
+
+# ctrl-r and alt-c behavior
+## method1: show all hidden file
+# export FZF_DEFAULT_COMMAND="fd --hidden"  
+## method1: show all hidden file besides ".git"
+# export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git*' 
+## method1: don't show any hidden file
+export FZF_DEFAULT_COMMAND="fd"
+ 
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND="$FZF_DEFAULT_COMMAND -t d"  # only type: dir
+
+# preview
+export FZF_DEFAULT_OPTS='--multi --reverse --bind ctrl-a:select-all,ctrl-e:deselect-all,alt-n:down,alt-p:up,alt-o:backward-delete-char,alt-h:beginning-of-line,alt-l:end-of-line,alt-j:backward-char,alt-k:forward-char,alt-b:backward-word,alt-f:forward-word --height 95% --layout reverse --border --preview "bat --style=numbers --color=always --line-range :500 {}"'
+
+
+export FZF_ALT_C_OPTS="--preview 'colorls --report {} | tail -n 24'"
+export FZF_CTRL_T_OPTS="--select-1 --exit-0"
+
+# color theme from 'Dracula'
+export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
+--color fg:-1,bg:-1,hl:230,fg+:3,bg+:233,hl+:229
+--color info:150,prompt:110,spinner:150,pointer:167,marker:174
+'
+
+# full window for CTRL+R
+export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
+
+# CTRL+x (Only can direct execute than CTRL+R) Only For ZSH 
+fzf-history-widget-accept() {
+  fzf-history-widget
+  zle accept-line
+}
+zle     -N     fzf-history-widget-accept
+#bindkey '^X' fzf-history-widget-accept
+
+# fzf & ripgrep switch
+alias ra="~/.rfv"
+
+fzf-rg() {
+  ~/.rfv
+  zle accept-line
+}
+zle     -N    fzf-rg
+#bindkey '^[r' fzf-rg
+
+
+zle -N fzf-file-widget
+#bindkey "^[t" fzf-file-widget
+
+
+# Ranger
+alias r="ranger"
+alias ra="python /mnt/d/lab/ranger/ranger_script.py >> ~/rc_remap.conf"
+
+
+# pip (for slow)
+export DISPLAY=
+
+alias conda='cmd.exe "/K" d:/miniconda/Scripts/activate.bat d:/miniconda'
