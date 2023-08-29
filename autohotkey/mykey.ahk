@@ -1535,7 +1535,6 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
         update_title(), __clear__()
     }
     __open__(){
-        clip_buffer.clear()
         clip_open_file(clip_editor_path)
         clear_edit_refresh()
     }
