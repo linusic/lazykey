@@ -171,7 +171,7 @@ LALT & 0::Send "{XButton2}"
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 OCR
-<!\::
+>!\::
 {
     Run python SCRIPT_ROOT_PATH "app\clipocr\main.py",, "hide"
 }
@@ -452,11 +452,11 @@ open_cmd(open_mode:=0)
     }
 }
 
-^+e::
-{
-    condition_cmd := 'explorer.exe /select,'
-    open_folder(condition_cmd, use_file:=true)
-}
+; ^+e::
+; {
+;     condition_cmd := 'explorer.exe /select,'
+;     open_folder(condition_cmd, use_file:=true)
+; }
 
 ;;; WinAPP
 #a::Run "appwiz.cpl"  ; ; App Remove
@@ -654,6 +654,9 @@ fake_data(fake_data_url){
 ::fado:: -i https://pypi.douban.com/simple  ;; DouBan repo for pip
 ::faqi:: -i https://pypi.tuna.tsinghua.edu.cn/simple ;; TsingHua repo for pip
 ::faspace::‏‏‎ ‎
+::faff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a copy output.mp4 ; m3u8 => mp4: file '<file_path>' ;  / instead of \ if not ''
+::faffft::ffmpeg -f concat -safe 0 -i input.txt -segment_time_metadata 1 -vf select=concatdec_select -af aselect=concatdec_select,aresample=async=1 output.mp4
+
 :X:faip::Send("127.0.0.1")
 
 ; for windows HARD PRESS
@@ -754,6 +757,8 @@ run_pwsh(){
 )
 
 ^e::Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
+^+e::Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe --inprivate")
+
 ; ;;;;;;;;;;; 📄File (No GUI)
 :*x:fdHo::RUN(subl "C:\Windows\System32\drivers\etc\hosts")
 :*x:fdPo::RUN(subl Format("C:\Users\{1}\Documents\PowerShell\Microsoft.PowerShell_profile.ps1", A_UserName))
@@ -1354,7 +1359,8 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
     search_gui.MarginX := 0
     search_gui.MarginY := 0
     search_gui.setFont(Format("s{1} ",root_font_size), font_name)
-    search_gui.OnEvent("Escape", __lv_focus) ; edit lose focus
+    ; search_gui.OnEvent("Escape", __lv_focus) ; edit lose focus
+    search_gui.OnEvent("Escape", __hide)
     search_gui.OnEvent("ContextMenu", __hide) ; Maybe TODO(More) CRUD
     ;;; Listview
     title_text := "TEXT" ; will dynamic modify
@@ -1394,7 +1400,6 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
         [syntax_symbol "bak","FileCopy 'clipboard_pin.cb' to 'clipboard_pin.cb.bak' (if not change in SRC Code), LV_KEY() => None"],
         [syntax_symbol "open","Open the data file using Notepad.exe if <clip_editor_path> not change in SRC Code, LV_KEY => None"],
         [syntax_symbol "sep<N>",  "Number of white line for cells separator to be pasted, default <N> is 0, eg: sep0, LV_KEY => None"],
-        [syntax_symbol "q","Quit; also press <ESC> to focus the LV, then press 'q', in other words: LV_KEY => q"],
         [sep_line_first_col, sep_line_second_col],
         ["LV_KEY", "means press hotkey in ListView, have the same functionality as EDIT_SYNTAX, but also additional features."],
         ["","t:PIN | T:Un-PIN | a:LOAD | A:Re-LOAD | r:RESET | {DELETE}:Delete Buffer | q:Quit"],
@@ -1612,12 +1617,6 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
         ; GetKeyName&NumGet:https://www.autohotkey.com/boards/viewtopic.php?t=114432
         switch GetKeyName(Format('vk{:X}', NumGet(lParam, 3 * A_PtrSize, 'UShort'))){
             ;;; move key just rename, the original WIN key can do more (eg: Shift+End/Home)
-            case "n": SendInput("{DOWN}") 
-            case "p": SendInput("{UP}")
-            case "d": SendInput("{PgDn}")
-            case "u": SendInput("{PgUp}")
-            case "h": SendInput("{HOME}")
-            case "l": SendInput("{END}")
             case "i", "o", "/": search_edit.Focus()
             ;;;
             case "q": __destroy()
