@@ -2,6 +2,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;   AHK V2.0.0  ;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 SCRIPT_ROOT_PATH := A_SCRIPTDIR "\"
+USER_PATH := "C:\Users\" A_UserName "\"
 
 PYTHON_PATH := "D:\python310\python.exe"
 SUBL_PATH := "D:\ide\Sublime\sublime_text.exe"
@@ -17,6 +18,7 @@ SendMode "Input"
 #Hotstring EndChars `t
 SetWinDelay -1   
 
+; 125%  1920x1080
 stable_dpi := 96
 current_dpi := A_ScreenDPI
 screen_scale := current_dpi / stable_dpi
@@ -109,7 +111,6 @@ win_next(){
 >!j::win_prev()
 >!k::win_next()
 
-
 ;;; jump and re-jump
 <!+s::Send "{F12}"  ; F12 is vsc
 LALT & 9::Send "{XButton1}"
@@ -160,9 +161,8 @@ LALT & 0::Send "{XButton2}"
         RunWait CMD
     }
 }
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 Send Input
-+F2::
++F3::
 {
     IB := InputBox("🧲🧲🧲🧲🧲🧲Input", "🧲Send Input", "w900 h150")
     if IB.Result != "Cancel" {
@@ -177,7 +177,36 @@ LALT & 0::Send "{XButton2}"
 }
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 History and Buffer Clipboard
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 Bulk Rename Syntax
++F2::copy_filenames_open_editor()
+!F2::Run python SCRIPT_ROOT_PATH "app\rename\bulk_rename.py",, "hide"
+#b::Run subl USER_PATH ".rename.log"
+
+copy_filenames_open_editor(){
+    if !hwnd := WinActive("ahk_class CabinetWClass") ; Address: E:\app
+        return 
+
+    A_Clipboard := ""
+    SendInput "^+c"
+    ClipWait(2)
+
+    filename_ls := ListSet()
+    Loop Parse A_Clipboard, "`n", "`r"
+        filename_ls.update(A_LoopField)
+    upstream_cmd := Format(
+        "({1})",
+        filename_ls.map( (x)=>Format("echo {1}", x)).join(" && ")
+    )
+    downstream_cmd := subl '--command "insert" - '
+    cmd := "cmd.exe /K "
+    full_cmd := cmd upstream_cmd " | " downstream_cmd
+    A_Clipboard :=  full_cmd
+    Run(full_cmd,, "Hide")
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 CoordMode "Caret", "Window"
 ; if for test , maybe change it to "Window"
 CoordMode "Tooltip", "screen"
@@ -243,7 +272,6 @@ CoordMode "Tooltip", "screen"
 ^<!k::Send "^#{right}"
 
 <+o::Send "^!{tab}"
-<!z::
 <+z::Send "#z"
 
 ; mmmm ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🖱️ Replace Mouse
@@ -460,7 +488,7 @@ open_cmd(open_mode:=0)
 
 ;;; WinAPP
 #a::Run "appwiz.cpl"  ; ; App Remove
-#b::Run "::{645ff040-5081-101b-9f08-00aa002f954e}"  ; bin
+; #b::Run "::{645ff040-5081-101b-9f08-00aa002f954e}"  ; bin
 #i::Run "::{7007acc7-3202-11d1-aad2-00805fc1270e}"  ; ncpa.cpl
 #n::Run "Notepad.exe"
 #p::RUN "wt.exe powershell.exe " python             ; python console
@@ -873,7 +901,7 @@ add_item_config(index, path, icon_or_text, is_app){
         micro_tag := "$USER"
         __path := path
         if InStr(path, micro_tag)
-            __path := StrReplace(path, micro_tag, "C:\Users\" A_UserName)
+            __path := StrReplace(path, micro_tag, USER_PATH)
         Run("open " __path)
         WinClose()
     }
