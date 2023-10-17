@@ -32,7 +32,14 @@ python := choose_python(PYTHON_PATH)
 python_c := python " -c "
 subl := SUBL_PATH " "
 
-<!q::Run(SUBL_PATH)
+
+<!q::
+{
+    static __SUBL_TOGGLE_REF := False
+    __subl_callback := () => Run(SUBL_PATH)
+    toggle_window_vis("ahk_class PX_WINDOW_CLASS", &__SUBL_TOGGLE_REF, __subl_callback)
+}
+>!q::Run(SUBL_PATH)
 <^<!q::subl_in_explorer()  ; <!+q not work in ST4 (Safe Mode)
 subl_in_explorer(){
     path := get_explorer_cur_path()
@@ -113,8 +120,6 @@ win_next(){
 
 ;;; jump and re-jump
 <!+s::Send "{F12}"  ; F12 is vsc
-LALT & 9::Send "{XButton1}"
-LALT & 0::Send "{XButton2}"
 
 ;;;;;;;;;;;;;;;;;;;;; 💻Terminal
 ; RUN "wt.exe -F -w _quake pwsh.exe -nologo -window hided"
@@ -188,23 +193,9 @@ copy_filenames_open_editor(){
 
     A_Clipboard := ""
     SendInput "^+c"
-    ClipWait(2)
-
-    filename_ls := ListSet()
-    Loop Parse A_Clipboard, "`n", "`r"
-        filename_ls.update(A_LoopField)
-    upstream_cmd := Format(
-        "({1})",
-        filename_ls.map( (x)=>Format("echo {1}", x)).join(" && ")
-    )
-    downstream_cmd := subl '--command "insert" - '
-    cmd := "cmd.exe /K "
-    full_cmd := cmd upstream_cmd " | " downstream_cmd
-    A_Clipboard :=  full_cmd
-    Run(full_cmd,, "Hide")
+    ClipWait(3)
+    Run python SCRIPT_ROOT_PATH "app\rename\open_editor.py",, "hide"
 }
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 CoordMode "Caret", "Window"
@@ -334,6 +325,8 @@ CapsLock & r::SendEvent "{Click Up}"
 <!x::Send "^x"
 <!c::Send "^c"
 <!v::Send "^v"
+LALT & 9::Send "{XButton1}"
+LALT & 0::Send "{XButton2}"
 <![::Send "{PgUp}"
 <!]::Send "{PgDn}"
 ^<!n::Send "^{end}"
@@ -686,6 +679,7 @@ fake_data(fake_data_url){
 ::faffft::ffmpeg -f concat -safe 0 -i input.txt -segment_time_metadata 1 -vf select=concatdec_select -af aselect=concatdec_select,aresample=async=1 output.mp4
 
 :X:faip::Send("127.0.0.1")
+:X:faipip::Send("https://127.0.0.1")
 
 ; for windows HARD PRESS
 :*x:tata::Run("taskmgr")
@@ -751,6 +745,9 @@ fake_data(fake_data_url){
 ; headers kv-pair string  =>  python-dict format
 #h::Run subl SCRIPT_ROOT_PATH "config\application.cfg"
 #j::Run python SCRIPT_ROOT_PATH "tool\headers_to_dict.py",, "Hide"
+#+j::Run python SCRIPT_ROOT_PATH "tool\json_format_mini.py",, "Hide"
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧱Hot String For WinAPP (Global FA)  (No GUI)
 !t::run_pwsh()
@@ -775,17 +772,22 @@ run_pwsh(){
             ; "--start-fullscreen chrome-extension://dbepggeogbaibhgnhhndojpepiihcmeb/pages/completion_engines.html"
         )
     }
-    toggle_window_vis("ahk_class Chrome_WidgetWin_1", &__CHROME_TOGGLE_REF, __chrome_callback)
+    toggle_window_vis("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1", &__CHROME_TOGGLE_REF, __chrome_callback)
 }
-
-; anonymous
 <!+w::Run(
     "C:\Program Files\Google\Chrome\Application\chrome.exe"
     " --incognito www.google.com"
-)
+) ; anonymous
 
-^e::Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
+^e::
+{
+    static __EDGE_TOGGLE_REF := False
+    __edge_callback := () => Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
+    toggle_window_vis("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1", &__EDGE_TOGGLE_REF, __edge_callback)
+}
 ^+e::Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe --inprivate")
+
+
 
 ; ;;;;;;;;;;; 📄File (No GUI)
 :*x:fdHo::RUN(subl "C:\Windows\System32\drivers\etc\hosts")
