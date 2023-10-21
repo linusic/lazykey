@@ -133,7 +133,7 @@ win_next(){
 #SuspendExempt False
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 ChatGPT
-<!CapsLock::
+>!CapsLock::
 {
     static __PALM_TOGGLE_REF := False
     ; __palm_callback := () => Run(python SCRIPT_ROOT_PATH "app\chat\main.py",, "hide")
@@ -146,7 +146,7 @@ win_next(){
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 New Translator
->!CapsLock::
+<!CapsLock::
 {
     static __TRANSLATOR_TOGGLE_REF := False
     __trans_callback := () => Run(python SCRIPT_ROOT_PATH "app\translator\main.py",, "hide")
@@ -675,6 +675,13 @@ fake_data(fake_data_url){
 ::fado:: -i https://pypi.douban.com/simple  ;; DouBan repo for pip
 ::faqi:: -i https://pypi.tuna.tsinghua.edu.cn/simple ;; TsingHua repo for pip
 ::faspace::‏‏‎ ‎
+; ::fafp::print("f`{  = `}")
+:R:fafp::
+{
+    s := 'print(f"{{}  =  {}}")'
+    Send(s)
+    Send("{HOME}{RIGHT 9}")
+}
 ::faff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a copy output.mp4 ; m3u8 => mp4: file '<file_path>' ;  / instead of \ if not ''
 ::faffft::ffmpeg -f concat -safe 0 -i input.txt -segment_time_metadata 1 -vf select=concatdec_select -af aselect=concatdec_select,aresample=async=1 output.mp4
 
