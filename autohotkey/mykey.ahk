@@ -42,19 +42,10 @@ subl := SUBL_PATH " "
 >!q::Run(SUBL_PATH)
 <^<!q::subl_in_explorer()  ; <!+q not work in ST4 (Safe Mode)
 subl_in_explorer(){
-    path := get_explorer_cur_path()
+    path := explorer_path()
     if not path
         return  ; ; (!path) ? Run(subl) : Run(subl Format('"{1}\tempFile"', path))
     Run(subl Format('"{1}\tempFile"', path)) ; InputBox? No! Commadn Palette => rename in ST
-}
-get_explorer_cur_path(){
-    if !hwnd := WinActive("ahk_class CabinetWClass") ; Address: E:\app
-        return
-    raw_path := ControlGetText("ToolbarWindow324", hwnd)
-    path := SubStr(raw_path, 10)  ; eg: Address => "E:\music\folder"
-    if not DirExist(path) ; other LANG OS
-        path := SubStr(raw_path, 5)  ; ........: E:\music\folder  => E:\music\folder
-    return path
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Browser & Explorer => URL
 >!F5::Reload
@@ -167,8 +158,11 @@ win_next(){
     }
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 Send Input
-+F3::
+; +F3::
+~^+f::
 {
+    if not explorer_active()
+        return
     IB := InputBox("🧲🧲🧲🧲🧲🧲Input", "🧲Send Input", "w900 h150")
     if IB.Result != "Cancel" {
         Send IB.Value
@@ -188,15 +182,50 @@ win_next(){
 #b::Run subl USER_PATH ".rename.log"
 
 copy_filenames_open_editor(){
-    if !hwnd := WinActive("ahk_class CabinetWClass") ; Address: E:\app
-        return 
-
+    if not explorer_active()
+        return
     A_Clipboard := ""
     SendInput "^+c"
     ClipWait(3)
     Run python SCRIPT_ROOT_PATH "app\rename\open_editor.py",, "hide"
 }
 
+
+white_space := "`n`r`t "  ; include " "
+strip(s){
+    return Trim(s, white_space)
+}
+lstrip(s){
+    return LTrim(s, white_space)
+}
+rtrip(s){
+    return RTrim(s, white_space)
+}
+^+v::
+{
+    if not strip(A_Clipboard)
+        return
+    if !path := explorer_path()
+        return
+
+    __file_path := path "\" FormatTime(A_Now, "yyyyMMdd_HHmmss") ".txt"
+    if FileExist(__file_path)
+        FileDelete(__file_path)
+    FileAppend(A_Clipboard, __file_path, "UTF-8")
+    Send("{F5}")
+}
+
+explorer_active(){
+    hwnd := WinActive("ahk_class CabinetWClass") ; Address: E:\app
+    return hwnd
+}
+explorer_path() {
+    if !__hwnd := explorer_active()
+        return
+    for win in ComObject('Shell.Application').Windows
+        try if win && win.hwnd && win.hwnd = __hwnd
+            return win.Document.Folder.Self.Path
+}
 
 CoordMode "Caret", "Window"
 ; if for test , maybe change it to "Window"
@@ -207,6 +236,7 @@ CoordMode "Tooltip", "screen"
 *#space::Send "{Ctrl}"     ; BLOCK => IME => ... + win + space
 
 <!space::Send "{ENTER}"
+<^space::Send "{ENTER}"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;  HotKey ReMap
 ^-::Send "^{WheelDown}"
@@ -459,16 +489,8 @@ open_cmd(open_mode:=0)
     }
     else
     {
-        try{
-            raw_path := ControlGetText("ToolbarWindow324", "A")    ; 324 is dynamic, maybe changed by the system update
-            ;  for EN Lang OS
-            path := SubStr(raw_path, 10)  ; eg: Address => "E:\music\folder"
-            if not DirExist(path) ; other LANG OS
-                path := SubStr(raw_path, 5)  ; .....: E:\music\folder
-        }
-        catch as Err{
-            path := "D:/"  ; if not, then cd "D:/"
-        }
+        if !path := explorer_path()
+            path := "D:/" 
         choice_for_open_cmd(path, open_mode)
     }
 }
@@ -675,13 +697,33 @@ fake_data(fake_data_url){
 ::fado:: -i https://pypi.douban.com/simple  ;; DouBan repo for pip
 ::faqi:: -i https://pypi.tuna.tsinghua.edu.cn/simple ;; TsingHua repo for pip
 ::faspace::‏‏‎ ‎
-; ::fafp::print("f`{  = `}")
-:R:fafp::
-{
-    s := 'print(f"{{}  =  {}}")'
-    Send(s)
-    Send("{HOME}{RIGHT 9}")
+
+
+;;;;;;;;;;;;;;;;;; ::fafp::print("f`{  = `}")
+escape_send_hotstring(hot_string, right_char_count:=0){
+    final_send_str := right_char_count
+    ? hot_string Format("{HOME}{RIGHT {1}}", right_char_count)
+    : hot_string
+    SendInput(final_send_str)
 }
+:RX:fafp::escape_send_hotstring('print(f"{{}  =  {}}")', 9)
+:RX:fapip::escape_send_hotstring("pip install -U ", 15)
+:RX:fapipw::escape_send_hotstring("pip install -U    > nul", 16)
+:RX:fapipe::escape_send_hotstring("pip install -U    > nul 2>&1", 16)
+
+; :R:fafp::
+; {
+;     s := 'print(f"{{}  =  {}}")'
+;     s_move := "{HOME}{RIGHT 9}"
+;     SendInput(s s_move)
+; }
+; :R:fapipi::
+; {
+;     s := "pip install -U    > nul 2>&1"
+;     s_move := "{HOME}{RIGHT 16}"
+;     SendInput(s s_move)
+; }
+
 ::faff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a copy output.mp4 ; m3u8 => mp4: file '<file_path>' ;  / instead of \ if not ''
 ::faffft::ffmpeg -f concat -safe 0 -i input.txt -segment_time_metadata 1 -vf select=concatdec_select -af aselect=concatdec_select,aresample=async=1 output.mp4
 
@@ -690,43 +732,47 @@ fake_data(fake_data_url){
 
 ; for windows HARD PRESS
 :*x:tata::Run("taskmgr")
-:X:fajs::f(SCRIPT_ROOT_PATH "hotstr\js.py")        ; tamper(js)
-:X:fadebug::f(SCRIPT_ROOT_PATH "hotstr\debug.py")  ; debug in webbrowser
-:X:fapan::f(SCRIPT_ROOT_PATH "hotstr\pan.py")      ; sense  (bdp)
+:X:fajs::f(SCRIPT_ROOT_PATH "hotstr\js.py")                        ; tamper(js)
+:X:fadebug::f(SCRIPT_ROOT_PATH "hotstr\debug.py")                  ; debug in webbrowser
+:X:fapan::f(SCRIPT_ROOT_PATH "hotstr\pan.py")                      ; sense  (bdp)
 :X:famain::f(SCRIPT_ROOT_PATH "hotstr\main.py")
 :X:faclip::f(SCRIPT_ROOT_PATH "hotstr\clip.py")
-:X:fatask::f(SCRIPT_ROOT_PATH "hotstr\taskfind.py") ; if taskfind can findstr
-:X:fadt::send(FormatTime(A_Now, "yyyy-MM-dd"))   ; by AHK
-:X:fadate::f(SCRIPT_ROOT_PATH "hotstr\date.py")    ; date (Bash)
-:X:fadatetime::f(SCRIPT_ROOT_PATH "hotstr\datetime.py")    ; datetime (python)
-:X:fatable::f(SCRIPT_ROOT_PATH "hotstr\table.py")  ; datetable
-:X:fapen::f(SCRIPT_ROOT_PATH "hotstr\pen.py")      ; pendulum
+:X:fatask::f(SCRIPT_ROOT_PATH "hotstr\taskfind.py")                ; if taskfind can findstr
+:X:fadt::send(FormatTime(A_Now, "yyyy-MM-dd"))                     ; by AHK
+:X:fadate::f(SCRIPT_ROOT_PATH "hotstr\date.py")                    ; date (Bash)
+:X:fadatetime::f(SCRIPT_ROOT_PATH "hotstr\datetime.py")            ; datetime (python)
+:X:fatable::f(SCRIPT_ROOT_PATH "hotstr\table.py")                  ; datetable
+:X:fapen::f(SCRIPT_ROOT_PATH "hotstr\pen.py")                      ; pendulum
 :X:falinsh::f(SCRIPT_ROOT_PATH "hotstr\linsh.py")
 :X:falinp::f(SCRIPT_ROOT_PATH "hotstr\linp.py")
 :X:fabdtool::f(SCRIPT_ROOT_PATH "hotstr\bdtool.py")
 :X:faflask::f(SCRIPT_ROOT_PATH "hotstr\flask.py")
-:X:fafastapi::f(SCRIPT_ROOT_PATH "hotstr\fastapi.py")     ; translate main
+:X:fafastapi::f(SCRIPT_ROOT_PATH "hotstr\fastapi.py")              ; translate main
 :X:fatrans::f(SCRIPT_ROOT_PATH "tool\old_translator\translate.py") ; translate
-:X:famail::f(SCRIPT_ROOT_PATH "hotstr\mail.py")    ; mail
-:X:fareq::f(SCRIPT_ROOT_PATH "hotstr\req.py")      ; httpx
-:X:faproxy::f(SCRIPT_ROOT_PATH "hotstr\proxy.py")  ; toggle winos proxy, and ALT & 3
-:X:fatext::f(SCRIPT_ROOT_PATH "hotstr\text.py")    ; extract text from html
-:X:fawc::f(SCRIPT_ROOT_PATH "hotstr\wc.py")        ; wordcloud
-:X:fajieba::f(SCRIPT_ROOT_PATH "hotstr\jieba.py")  ; jieba
-:X:fahyper::f(SCRIPT_ROOT_PATH "hotstr\hyper.py")  ; hyper link for MS
-:X:facap::f(SCRIPT_ROOT_PATH "hotstr\cap.py")      ; ddddocr
-:X:fazhihu:: f(SCRIPT_ROOT_PATH "hotstr\zhihu.py") ; zhihu slide cap
-:X:faconf::f(SCRIPT_ROOT_PATH "hotstr\conf.py")    ; ConfParser
-:X:fash::f(SCRIPT_ROOT_PATH "hotstr\sh.py")        ; all shell bottom show
-:X:faexe::f(SCRIPT_ROOT_PATH "hotstr\exe.py")      ; compile exe
-:X:fadeco::f(SCRIPT_ROOT_PATH "hotstr\decorator.py") ; decorator
-:X:fapypi::f(SCRIPT_ROOT_PATH "hotstr\pypi.py")    ; pypi
-:X:fawith::f(SCRIPT_ROOT_PATH "hotstr\with.py")   ; with
-:X:falog::f(SCRIPT_ROOT_PATH "hotstr\log.py")   ; log
-:X:faen::f(SCRIPT_ROOT_PATH "hotstr\en.py")   ; faen
-:X:famd::f(SCRIPT_ROOT_PATH "hotstr\md.py")   ; famd
-:X:faweb::f(SCRIPT_ROOT_PATH "hotstr\web.py")   ; faweb (webbrowser: chrome --incognito)
-:X:fatoml::f(SCRIPT_ROOT_PATH "hotstr\toml.py")   ; toml template
+:X:famail::f(SCRIPT_ROOT_PATH "hotstr\mail.py")                    ; mail
+:X:fareq::f(SCRIPT_ROOT_PATH "hotstr\req.py")                      ; httpx
+:X:faproxy::f(SCRIPT_ROOT_PATH "hotstr\proxy.py")                  ; toggle winos proxy, and ALT & 3
+:X:fatext::f(SCRIPT_ROOT_PATH "hotstr\text.py")                    ; extract text from html
+:X:fawc::f(SCRIPT_ROOT_PATH "hotstr\wc.py")                        ; wordcloud
+:X:fajieba::f(SCRIPT_ROOT_PATH "hotstr\jieba.py")                  ; jieba
+:X:fahyper::f(SCRIPT_ROOT_PATH "hotstr\hyper.py")                  ; hyper link for MS
+:X:facap::f(SCRIPT_ROOT_PATH "hotstr\cap.py")                      ; ddddocr
+:X:fazhihu:: f(SCRIPT_ROOT_PATH "hotstr\zhihu.py")                 ; zhihu slide cap
+:X:faconf::f(SCRIPT_ROOT_PATH "hotstr\conf.py")                    ; ConfParser
+:X:fash::f(SCRIPT_ROOT_PATH "hotstr\sh.py")                        ; all shell bottom show
+:X:faexe::f(SCRIPT_ROOT_PATH "hotstr\exe.py")                      ; compile exe
+:X:fadeco::f(SCRIPT_ROOT_PATH "hotstr\decorator.py")               ; decorator
+:X:fapypi::f(SCRIPT_ROOT_PATH "hotstr\pypi.py")                    ; pypi
+:X:fawith::f(SCRIPT_ROOT_PATH "hotstr\with.py")                    ; with
+:X:falog::f(SCRIPT_ROOT_PATH "hotstr\log.py")                      ; log
+:X:faen::f(SCRIPT_ROOT_PATH "hotstr\en.py")                        ; faen
+:X:famd::f(SCRIPT_ROOT_PATH "hotstr\md.py")                        ; famd
+:X:faweb::f(SCRIPT_ROOT_PATH "hotstr\web.py")                      ; faweb (webbrowser: chrome --incognito)
+:X:fatoml::f(SCRIPT_ROOT_PATH "hotstr\toml.py")                    ; toml template
+:X:fabuild::f(SCRIPT_ROOT_PATH "hotstr\build.py")                  ; build pyproject.toml
+:X:fatype::f(SCRIPT_ROOT_PATH "hotstr\type.py")                    ; type hint for Literal
+:X:fapool::f(SCRIPT_ROOT_PATH "hotstr\pool.py")                    ; proxy pool
+
 
 ; ----------------- for rs
 :X:rsm::f(SCRIPT_ROOT_PATH "hotstr\rs\main.rs", "{UP}{TAB}")   ; main
@@ -1105,7 +1151,7 @@ upstream_global_listening(data_type){
         return clip_save_image()
 
     c := A_Clipboard
-    if not Trim(c, white_space) 
+    if not Trim(c, white_space)
         return
     clip_buffer.update(RTrim(c, white_space)) ; Just RTrim
 }
@@ -1581,7 +1627,9 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
         clear_edit_refresh()
     }
     __bak__(){ ; 1 : overwrite
-        FileCopy(CLIP_TEXT_FILE, CLIP_TEXT_FILE ".bak", 1), clear_edit_refresh()
+        FileCopy(CLIP_TEXT_FILE, CLIP_TEXT_FILE ".bak", 1)
+        FileCopy(CLIP_TEXT_PIN_FILE, CLIP_TEXT_PIN_FILE ".bak", 1)
+        clear_edit_refresh()
     }
     __load__(){
         mode_2_title.Set("LOAD","Load FILE"), update_title(), clear_edit_refresh()
