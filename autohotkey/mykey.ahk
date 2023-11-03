@@ -181,16 +181,6 @@ win_next(){
 !F2::Run python SCRIPT_ROOT_PATH "app\rename\bulk_rename.py",, "hide"
 #b::Run subl USER_PATH ".rename.log"
 
-copy_filenames_open_editor(){
-    if not explorer_active()
-        return
-    A_Clipboard := ""
-    SendInput "^+c"
-    ClipWait(3)
-    Run python SCRIPT_ROOT_PATH "app\rename\open_editor.py",, "hide"
-}
-
-
 white_space := "`n`r`t "  ; include " "
 strip(s){
     return Trim(s, white_space)
@@ -200,6 +190,25 @@ lstrip(s){
 }
 rtrip(s){
     return RTrim(s, white_space)
+}
+copy_filenames_open_editor(){
+    if not explorer_active()
+        return
+    A_Clipboard := ""
+    SendInput "^+c"
+    ClipWait(3)
+    Run python SCRIPT_ROOT_PATH "app\rename\open_editor.py",, "hide"
+}
+explorer_active(){
+    hwnd := WinActive("ahk_class CabinetWClass") ; Address: E:\app
+    return hwnd
+}
+explorer_path() {
+    if !__hwnd := explorer_active()
+        return
+    for win in ComObject('Shell.Application').Windows
+        try if win && win.hwnd && win.hwnd = __hwnd
+            return win.Document.Folder.Self.Path
 }
 ^+v::
 {
@@ -214,18 +223,13 @@ rtrip(s){
     FileAppend(A_Clipboard, __file_path, "UTF-8")
     Send("{F5}")
 }
+#HotIf WinActive("ahk_exe chrome.exe") 
+^+p::Send "^{space}"
+#HotIf
+#HotIf WinActive("ahk_exe msedge.exe")
+^+p::Send "^q"
+#HotIf
 
-explorer_active(){
-    hwnd := WinActive("ahk_class CabinetWClass") ; Address: E:\app
-    return hwnd
-}
-explorer_path() {
-    if !__hwnd := explorer_active()
-        return
-    for win in ComObject('Shell.Application').Windows
-        try if win && win.hwnd && win.hwnd = __hwnd
-            return win.Document.Folder.Self.Path
-}
 
 CoordMode "Caret", "Window"
 ; if for test , maybe change it to "Window"
@@ -236,7 +240,7 @@ CoordMode "Tooltip", "screen"
 *#space::Send "{Ctrl}"     ; BLOCK => IME => ... + win + space
 
 <!space::Send "{ENTER}"
-<^space::Send "{ENTER}"
+; <^space::Send "{ENTER}"    ;  TODO chrome
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;  HotKey ReMap
 ^-::Send "^{WheelDown}"
@@ -293,7 +297,6 @@ CoordMode "Tooltip", "screen"
 ^<!k::Send "^#{right}"
 
 <+o::Send "^!{tab}"
-<+z::Send "#z"
 
 ; mmmm ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🖱️ Replace Mouse
 ;;; 2:   =>(0,100) =>  (fast, lowest)
