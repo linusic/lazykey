@@ -4,7 +4,7 @@
 SCRIPT_ROOT_PATH := A_SCRIPTDIR "\"
 USER_PATH := "C:\Users\" A_UserName "\"
 
-PYTHON_PATH := "D:\python310\python.exe"
+PYTHON_PATH := "D:\python311\python.exe"
 SUBL_PATH := "D:\ide\Sublime\sublime_text.exe"
 
 CLIP_ROOT_DIR := "E:\app\clipboard"
@@ -78,21 +78,20 @@ cp_path()
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; remap -> numbers
-Capslock & h::Send "0" ;
-Capslock & j::Send "1"
-Capslock & k::Send "2"
-Capslock & l::Send "3" ;
-Capslock & u::Send "4"
-Capslock & i::Send "5"
-Capslock & o::Send "6"
-Capslock & p::Send "6"
-Capslock & 8::Send "7" ;
-Capslock & 9::Send "8"
-Capslock & 0::Send "9"
-Capslock & m::Send "0" ;
-Capslock & n::Send "0"
-
-Capslock & Space::Space
+; Capslock & h::Send "0" ;
+; Capslock & j::Send "1"
+; Capslock & k::Send "2"
+; Capslock & l::Send "3" ;
+; Capslock & u::Send "4"
+; Capslock & i::Send "5"
+; Capslock & o::Send "6"
+; Capslock & p::Send "6"
+; Capslock & 8::Send "7" ;
+; Capslock & 9::Send "8"
+; Capslock & 0::Send "9"
+; Capslock & m::Send "0" ;
+; Capslock & n::Send "0"
+; Capslock & Space::Space
 ;;;;;;;;;;;;;;;;;;;;; 🖥️For Switch Screen (effect below all RAlt)
 win_prev(){
     Send "!{ESC}"   ; ←
@@ -223,7 +222,8 @@ explorer_path() {
     FileAppend(A_Clipboard, __file_path, "UTF-8")
     Send("{F5}")
 }
-#HotIf WinActive("ahk_exe chrome.exe") 
+; Command Palette for Chrome + Edge
+#HotIf WinActive("ahk_exe chrome.exe") ; Enbale "Quick Commands" => chrome://flags/
 ^+p::Send "^{space}"
 #HotIf
 #HotIf WinActive("ahk_exe msedge.exe")
@@ -374,9 +374,6 @@ LALT & 0::Send "{XButton2}"
 
 LAlt & RAlt::Send "{esc}"
 #HotIf
-
-; >!2::Send "^{Tab}"
-; >!1::Send "^+{Tab}"
 
 ;;;;;;;; Toggle WinOS Proxy
 <!6::set_proxy_port()
@@ -710,7 +707,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
     SendInput(final_send_str)
 }
 :RX:fafp::escape_send_hotstring('print(f"{{}  =  {}}")', 9)
-:RX:fapip::escape_send_hotstring("pip install -U ", 15)
+:RX:fapip::escape_send_hotstring("pip install -q -U ", 18)
 :RX:fapipw::escape_send_hotstring("pip install -U    > nul", 16)
 :RX:fapipe::escape_send_hotstring("pip install -U    > nul 2>&1", 16)
 
@@ -775,6 +772,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:fabuild::f(SCRIPT_ROOT_PATH "hotstr\build.py")                  ; build pyproject.toml
 :X:fatype::f(SCRIPT_ROOT_PATH "hotstr\type.py")                    ; type hint for Literal
 :X:fapool::f(SCRIPT_ROOT_PATH "hotstr\pool.py")                    ; proxy pool
+:X:favoice::f(SCRIPT_ROOT_PATH "hotstr\voice.py")                   ; pyttsx3
 
 
 ; ----------------- for rs
@@ -805,17 +803,12 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧱Hot String For WinAPP (Global FA)  (No GUI)
-!t::run_pwsh()
->!P::run_pwsh()
-!`::
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 ^TOGGLE APP
+!`:: ; replace Terminal: Quake Mode
 {
+    run_pwsh := () => open_cmd(open_mode:=1)
     static __TERMINAL_TOGGLE_REF := False
     toggle_window_vis("ahk_class CASCADIA_HOSTING_WINDOW_CLASS",&__TERMINAL_TOGGLE_REF, run_pwsh)
-}
-
-run_pwsh(){
-    open_cmd(open_mode:=1) ; 1: pwsh
 }
 
 <!w::
@@ -835,15 +828,21 @@ run_pwsh(){
     " --incognito www.google.com"
 ) ; anonymous
 
-^e::
+<^e::
 {
     static __EDGE_TOGGLE_REF := False
     __edge_callback := () => Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
     toggle_window_vis("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1", &__EDGE_TOGGLE_REF, __edge_callback)
 }
-^+e::Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe --inprivate")
+<^+e::Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe --inprivate")
 
-
+<!1::
+{
+    static __VSCODE_TOGGLE_REF := False
+    __vscode_callback := () => Run("D:\ide\vscode\Code.exe")
+    toggle_window_vis("ahk_exe Code.exe", &__VSCODE_TOGGLE_REF, __vscode_callback)
+}
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 TOGGLE APP$
 
 ; ;;;;;;;;;;; 📄File (No GUI)
 :*x:fdHo::RUN(subl "C:\Windows\System32\drivers\etc\hosts")
@@ -1088,7 +1087,6 @@ get_visiable_windows(exclude_window_titles*){
 /*
 ┌───────────────────────────────────────────────────────────────────────────┐
 │ AutoHotkey(V2.0.0+): https://github.com/AutoHotkey/AutoHotkey/releases    │
-│ cliptoy            : https://github.com/linusic/cliptoy                   │
 └───────────────────────────────────────────────────────────────────────────┘
 */
 
@@ -1103,7 +1101,6 @@ clip_editor_path := SUBL_PATH  ; config the editor abs path, eg: C:\Windows\Syst
 
 ; (Optional) Down cbimg.dll and put into blow dir, the if need (listen: when copy image => auto save into CLIP_IMG_DIR)
 ; the path can be replaced freely, as long as the path can be found;
-; source code => https://github.com/linusic/cliptoy/blob/73c2e86250d44deb1df9ea20bdc94c3f23e79fd5/lib/cbimg/dll/cbimg.dll
 ; detail => clip_save_image() function
 enable_listen_cb_image_and_save := True                        ; True if need, auto save to CLIP_IMG_DIR in CLIP_ROOT_DIR
 clip_image_dll_path := A_SCRIPTDIR "\lib\cbimg\dll\cbimg.dll"   ; and special or replace the DLL path
@@ -1497,7 +1494,6 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
         ["",Format("the search: column `ID` is redundant for search(filter) or Sort(Click Header)", syntax_symbol)],
         ["","the click: <Double LButton> can auto Copy and Paste in to your main window such as <WIN+V>"],
         [sep_line_first_col, sep_line_second_col],
-        ["REPO", "https://github.com/linusic/cliptoy"],
         ["IDEA", "https://github.com/linusic/lazykey/blob/main/autohotkey/mykey.ahk"],
     ]
     __on_change(*){
