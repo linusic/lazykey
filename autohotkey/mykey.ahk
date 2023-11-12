@@ -836,6 +836,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 }
 <^+e::Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe --inprivate")
 
+<^1::
 <!1::
 {
     static __VSCODE_TOGGLE_REF := False
@@ -851,8 +852,8 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 
 ;; ffff (for unique search) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ⌨ KeyMap For (FA and FD)
-^1::GUI_APP.Show("AutoSize Maximize")
-^2::GUI_FD.Show("AutoSize Maximize")
+; ^1::GUI_APP.Show("AutoSize Maximize")
+; ^2::GUI_FD.Show("AutoSize Maximize")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  🅰️ APP(FA)
 win_close(*){
     WinClose()
