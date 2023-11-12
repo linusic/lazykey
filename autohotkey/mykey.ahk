@@ -365,8 +365,8 @@ LALT & 0::Send "{XButton2}"
 ^<!n::Send "^{end}"
 ^<!p::Send "^{home}"
 ; [Select]
-<!a::Send "^+{home}"
-~<!e::Send "^+{end}"
+>!a::Send "^+{home}"
+>!e::Send "^+{end}"
 ; [Screen In WindowOS]
 <!d::Send "^{left}^+{right}^c"
 !m::Send "{esc}"
@@ -828,13 +828,13 @@ escape_send_hotstring(hot_string, right_char_count:=0){
     " --incognito www.google.com"
 ) ; anonymous
 
-<^e::
+<!e::
 {
     static __EDGE_TOGGLE_REF := False
     __edge_callback := () => Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
     toggle_window_vis("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1", &__EDGE_TOGGLE_REF, __edge_callback)
 }
-<^+e::Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe --inprivate")
+<!+e::Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe --inprivate")
 
 <^1::
 <!1::
