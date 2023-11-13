@@ -209,17 +209,26 @@ explorer_path() {
         try if win && win.hwnd && win.hwnd = __hwnd
             return win.Document.Folder.Self.Path
 }
+
+
+latest_is_image_type := False
+latest_image_path := ""
 ^+v::
 {
-    if not strip(A_Clipboard)
-        return
     if !path := explorer_path()
         return
 
-    __file_path := path "\" FormatTime(A_Now, "yyyyMMdd_HHmmss") ".txt"
-    if FileExist(__file_path)
-        FileDelete(__file_path)
-    FileAppend(A_Clipboard, __file_path, "UTF-8")
+    if !latest_is_image_type and !strip(A_Clipboard)
+        return
+    
+    if latest_is_image_type and latest_image_path {
+        try FileCopy(latest_image_path, path, 0) ; not overwrite,  not change
+    } else {
+        __file_path := path "\" FormatTime(A_Now, "yyyyMMdd_HHmmss") ".txt"
+        if FileExist(__file_path)
+            FileDelete(__file_path)
+        FileAppend(A_Clipboard, __file_path, "UTF-8")  
+    }
     Send("{F5}")
 }
 ; Command Palette for Chrome + Edge
@@ -507,13 +516,6 @@ open_cmd(open_mode:=0)
 #i::Run "::{7007acc7-3202-11d1-aad2-00805fc1270e}"  ; ncpa.cpl
 #n::Run "Notepad.exe"
 #p::RUN "wt.exe powershell.exe " python             ; python console
-#e::fullscreen_explorer()  ; explorer.exe fullscreen
-fullscreen_explorer()
-{
-    Run "Explorer.exe",,"Max"  ; WinWait OS LANG dynamic
-    sleep 1000
-    Send "{F11}"
-}
 
 ; edit the select
 <+r::
@@ -629,7 +631,7 @@ XButton1:: ; ↓
     else if (abs(x1-x2) < (y2-y1) and (y2-y1) > allow_distance) ; ↓ :y2 > y1
         open_cmd(open_mode:=1) ; powershell
     else if (abs(x1-x2) < (y1-y2) and (y1-y2) > allow_distance) ; ↑ :y2 < y1
-        fullscreen_explorer()
+        open_explorer()
     else   ; No Move
         send "{XButton1}"
 }
@@ -843,6 +845,33 @@ escape_send_hotstring(hot_string, right_char_count:=0){
     __vscode_callback := () => Run("D:\ide\vscode\Code.exe")
     toggle_window_vis("ahk_exe Code.exe", &__VSCODE_TOGGLE_REF, __vscode_callback)
 }
+
+<!2::
+{
+    static __VLC_TOGGLE_REF := False
+    __vlc_callback := () => Run("E:\app\vlc\vlc.exe")
+    toggle_window_vis("ahk_exe vlc.exe ahk_class Qt5QWindowIcon", &__VLC_TOGGLE_REF, __vlc_callback)
+}
+#HotIf WinActive("ahk_exe vlc.exe")
+<!+2::Send("^l") ; toggle vlc playlist
+#HotIf
+
+<!3::
+#e::
+{
+    static __EXPLORER_TOGGLE_REF := False
+    toggle_window_vis("ahk_class CabinetWClass ahk_exe explorer.exe", &__EXPLORER_TOGGLE_REF, open_explorer)
+}
+<!+3::
+{
+    open_explorer()
+}
+open_explorer(){
+    Run "Explorer.exe",,"Max"  ; WinWait OS LANG dynamic
+}
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 TOGGLE APP$
 
 ; ;;;;;;;;;;; 📄File (No GUI)
@@ -1148,21 +1177,31 @@ clip_open_file(editor_abs_path := ""){
 }
 
 upstream_global_listening(data_type){
-    if enable_listen_cb_image_and_save and data_type == 2
-        return clip_save_image()
+    global latest_is_image_type
 
-    c := A_Clipboard
-    if not Trim(c, white_space)
-        return
-    clip_buffer.update(RTrim(c, white_space)) ; Just RTrim
+    if enable_listen_cb_image_and_save and data_type == 2 {
+        latest_is_image_type := True ; to sned !+v
+        return clip_save_image()
+    }else{
+        c := A_Clipboard
+        if not Trim(c, white_space)
+            return
+        clip_buffer.update(RTrim(c, white_space)) ; Just RTrim
+        latest_is_image_type := False ; to sned !+v
+    }
 }
 clip_save_image(sleep_ms:=0){
+    global latest_image_path 
+
     img_file_name := FormatTime(A_Now, "yyyyMMdd_HHmmss")
     full_path := CLIP_ROOT_DIR "\images\" img_file_name ".jpg"
     ;;; some screenshot need sleep 1s, otherwise black bg.
     ; sleep sleep_ms ; 
     mod_4_free := DllCall("LoadLibrary", "Str", clip_image_dll_path, "Ptr")
     err := DllCall("cbimg\GetCBImage", "Str", full_path)
+
+    if not err
+        latest_image_path := full_path ; to sned !+v
 
     ;;; ------------------------  check or notify if need
     ; if !Integer(err)
