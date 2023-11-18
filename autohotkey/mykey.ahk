@@ -634,7 +634,8 @@ XButton1:: ; ↓
     else if (abs(x1-x2) < (y2-y1) and (y2-y1) > allow_distance) ; ↓ :y2 > y1
         open_cmd(open_mode:=1) ; powershell
     else if (abs(x1-x2) < (y1-y2) and (y1-y2) > allow_distance) ; ↑ :y2 < y1
-        open_explorer()
+        ; open_explorer()
+        Send "^!{tab}"
     else   ; No Move
         send "{XButton1}"
 }
