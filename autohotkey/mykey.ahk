@@ -105,7 +105,10 @@ win_next(){
         WinActivate("A")
 }
 
+XButton1 & WheelUp::
 >!j::win_prev()
+
+XButton1 & WheelDown::
 >!k::win_next()
 
 ;;; jump and re-jump
