@@ -29,7 +29,7 @@
 #########################################################################################
 
 
-########## 🧱 Global For PowerShell ( main for RipGrep)
+########## Global For PowerShell ( main for RipGrep)
 $OutputEncoding = [console]::InputEncoding = [console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(936);
 
 ########## for busybox
@@ -41,11 +41,11 @@ Get-Alias | ForEach-Object {
     }
 }
 
-########## 🧱 Conda
+########## Conda
 function get-conda { cmd.exe "/K" D:/miniconda/Scripts/activate.bat D:/miniconda }
 Set-Alias conda get-conda
 
-########## 🧱 Command
+########## Command
 function cd_c{ cd c:/ }
 function cd_d{ cd d:/ }
 function cd_e{ cd e:/ }
@@ -56,21 +56,28 @@ Set-Alias je cd_e
 Set-Alias e     explorer.exe
 Set-Alias t     taskmgr.exe
 
-function new_clear { "`n" * 100 }
-new_clear
-Set-Alias clear new_clear
-
 Set-Alias p python
 Set-Alias c clip
 
-########## 🧱 VULTR
+# function new_clear { "`n" * 100 }
+# new_clear
+# Set-Alias clear new_clear
+
+function new_clear {
+    Clear-Host
+    [console]::setcursorposition(0, [console]::bufferheight - 1)
+}
+Set-Alias clear new_clear
+clear
+
+########## VULTR
 function vultr_script{ python D:\lab\vultr\vultr\vultr.py $args }
 Set-Alias vultr vultr_script
 
 function time_script{ python D:\ahk\hotstr\avg_time.py $args }
 Set-Alias time time_script
 
-########## 🧱 autojump
+########## autojump
 function auto_jump {
     $autojump_script_path = (cd ~ && $pwd.path) + "\AppData\Local\autojump\bin\autojump"
 
@@ -93,12 +100,13 @@ Set-Alias j        auto_jump
 $raw_autojump_path = $HOME + "\AppData\Local\autojump\bin\autojump.bat"
 Set-Alias autojump $raw_autojump_path
 
-########## 🧱 FZF + PSFZF + RipGrep + Bat
-### 🔎 FZF
+########################################################################################
+########## FZF + PSFZF + RipGrep + Bat
+### FZF
 $Env:FZF_DEFAULT_OPTS='--multi --border=none --bind ctrl-a:select-all,alt-a:deselect-all,alt-n:down,alt-p:up,alt-o:backward-delete-char,alt-h:beginning-of-line,alt-l:end-of-line,alt-j:backward-char,alt-k:forward-char,alt-b:backward-word,alt-f:forward-word --margin=1,0,0,0'
 
 
-### 🔎 FZF + Bat (File Context Search)
+### FZF + Bat (File Context Search)
 function search(){
     $init_query = ($args | Out-String).Trim()
     subl( rg --line-number --field-match-separator : --no-heading --smart-case "${*:-}" | fzf --query $init_query --delimiter : --preview 'bat --color=always {1}' --preview-window 'up,60%,border-bottom' | python -c "{
@@ -107,7 +115,7 @@ function search(){
 }
 Set-Alias s search
 
-### 🔎 PSFZF (Ctrl-R) (Depend on "PSReadLineOption" Module)
+### PSFZF (Ctrl-R) (Depend on "PSReadLineOption" Module)
 function clear_history{
     Clear-Content (Get-PSReadLineOption).HistorySavePath
 }
@@ -118,6 +126,7 @@ Set-Alias fk            Invoke-FuzzyKillProcess
 Set-Alias fkill         Invoke-FuzzyKillProcess
 
 
-### 🔎 PSFZF (Ctrl+T)(Ctrl+R) (Alt-C)
-Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
+### PSFZF (Ctrl+T)(Ctrl+R) (Alt-C)
+# Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
 # Set-PsFzfOption -TabExpansion Tab
+########################################################################################
