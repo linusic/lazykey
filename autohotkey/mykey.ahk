@@ -105,11 +105,15 @@ win_next(){
         WinActivate("A")
 }
 
-<!WheelUp::
->!j::win_prev()
 
-<!WheelDown::
->!k::win_next()
+>!j::Send("^+{TAB}")
+>!k::Send("^{TAB}")
+
+>!+j::
+<!WheelUp::win_prev()
+>!+k::
+<!WheelDown::win_next()
+
 
 ;;; jump and re-jump
 <!+s::Send "{F12}"  ; F12 is vsc
@@ -248,7 +252,7 @@ CoordMode "Caret", "Window"
 CoordMode "Tooltip", "screen"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;; Block All Menu for RALT
-~RAlt::Send "^{space}"       ; 🛑IME need open (Ctrl and Ctrl+Space) 💧 drop 4keys: #
+; ~RAlt::Send "^{space}"       ; 🛑IME need open (Ctrl and Ctrl+Space) 💧 drop 4keys: #
 *#space::Send "{Ctrl}"     ; BLOCK => IME => ... + win + space
 
 <!space::Send "{ENTER}"
