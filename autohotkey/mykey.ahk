@@ -12,6 +12,11 @@ CLIP_ROOT_DIR := "E:\app\clipboard"
 APP_CONFIG_PATH := SCRIPT_ROOT_PATH "config\application.cfg"  ; #h
 APP_BACKGROUND_IMAGE_APP := SCRIPT_ROOT_PATH "image\bg.png"
 APP_BACKGROUND_IMAGE_FOLDER := SCRIPT_ROOT_PATH "image\bg.png"
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;
+TOGGLE_APP_DICT := Map()
+;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; SetTitleMatchMode 2   ; (default) windows just need contains <WinTitle>
 SendMode "Input"
@@ -35,9 +40,8 @@ subl := SUBL_PATH " "
 
 <!q::
 {
-    static __SUBL_TOGGLE_REF := False
-    __subl_callback := () => Run(SUBL_PATH)
-    toggle_window_vis("ahk_class PX_WINDOW_CLASS", &__SUBL_TOGGLE_REF, __subl_callback)
+    callback := () => Run(SUBL_PATH)
+    toggle_window_vis("ahk_class PX_WINDOW_CLASS", callback)
 }
 >!q::Run(SUBL_PATH)
 <^<!q::subl_in_explorer()  ; <!+q not work in ST4 (Safe Mode)
@@ -132,26 +136,15 @@ win_next(){
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 ChatGPT
 >!CapsLock::
 {
-    static __PALM_TOGGLE_REF := False
-    ; __palm_callback := () => Run(python SCRIPT_ROOT_PATH "app\chat\main.py",, "hide")
-    __palm_callback := () => Run(python SCRIPT_ROOT_PATH "app\palm\main.py",, "hide")
-    toggle_window_vis(
-        "PaLM ahk_class TkTopLevel",
-        &__PALM_TOGGLE_REF,
-        __palm_callback
-    )
+    callback := () => Run(python SCRIPT_ROOT_PATH "app\palm\main.py",, "hide")
+    toggle_window_vis("PaLM ahk_class TkTopLevel", callback)
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 New Translator
 <!CapsLock::
 {
-    static __TRANSLATOR_TOGGLE_REF := False
-    __trans_callback := () => Run(python SCRIPT_ROOT_PATH "app\translator\main.py",, "hide")
-    toggle_window_vis(
-        "Translator ahk_class TkTopLevel",
-        &__TRANSLATOR_TOGGLE_REF,
-        __trans_callback
-    )
+    callback := () => Run(python SCRIPT_ROOT_PATH "app\translator\main.py",, "hide")
+    toggle_window_vis("Translator ahk_class TkTopLevel", callback)
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 M3U8 Downloader
@@ -816,22 +809,20 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 ^TOGGLE APP
 !`:: ; replace Terminal: Quake Mode
 {
-    run_pwsh := () => open_cmd(open_mode:=1)
-    static __TERMINAL_TOGGLE_REF := False
-    toggle_window_vis("ahk_class CASCADIA_HOSTING_WINDOW_CLASS",&__TERMINAL_TOGGLE_REF, run_pwsh)
+    callback := () => open_cmd(open_mode:=1)
+    toggle_window_vis("ahk_class CASCADIA_HOSTING_WINDOW_CLASS", callback)
 }
 
 <!w::
 {
-    static __CHROME_TOGGLE_REF := False
-    __chrome_callback(){
+    callback(){
         Run(
             "C:\Program Files\Google\Chrome\Application\chrome.exe "
             "chrome-extension://dbepggeogbaibhgnhhndojpepiihcmeb/pages/completion_engines.html"
             ; "--start-fullscreen chrome-extension://dbepggeogbaibhgnhhndojpepiihcmeb/pages/completion_engines.html"
         )
     }
-    toggle_window_vis("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1", &__CHROME_TOGGLE_REF, __chrome_callback)
+    toggle_window_vis("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1", callback)
 }
 <!+w::Run(
     "C:\Program Files\Google\Chrome\Application\chrome.exe"
@@ -840,25 +831,22 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 
 <!e::
 {
-    static __EDGE_TOGGLE_REF := False
-    __edge_callback := () => Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
-    toggle_window_vis("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1", &__EDGE_TOGGLE_REF, __edge_callback)
+    callback := () => Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
+    toggle_window_vis("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1", callback)
 }
 <!+e::Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe --inprivate")
 
 <^1::
 <!1::
 {
-    static __VSCODE_TOGGLE_REF := False
-    __vscode_callback := () => Run("D:\ide\vscode\Code.exe")
-    toggle_window_vis("ahk_exe Code.exe", &__VSCODE_TOGGLE_REF, __vscode_callback)
+    callback := () => Run("D:\ide\vscode\Code.exe")
+    toggle_window_vis("ahk_exe Code.exe", callback)
 }
 
 <!2::
 {
-    static __VLC_TOGGLE_REF := False
-    __vlc_callback := () => Run("E:\app\vlc\vlc.exe")
-    toggle_window_vis("ahk_exe vlc.exe ahk_class Qt5QWindowIcon", &__VLC_TOGGLE_REF, __vlc_callback)
+    callback := () => Run("E:\app\vlc\vlc.exe")
+    toggle_window_vis("ahk_exe vlc.exe ahk_class Qt5QWindowIcon", callback)
 }
 #HotIf WinActive("ahk_exe vlc.exe")
 <!+2::Send("^l") ; toggle vlc playlist
@@ -867,8 +855,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 <!3::
 #e::
 {
-    static __EXPLORER_TOGGLE_REF := False
-    toggle_window_vis("ahk_class CabinetWClass ahk_exe explorer.exe", &__EXPLORER_TOGGLE_REF, open_explorer)
+    toggle_window_vis("ahk_class CabinetWClass ahk_exe explorer.exe", open_explorer)
 }
 <!+3::
 {
@@ -1763,13 +1750,23 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
 }
 
 
-toggle_window_vis(win_title, &toggle_vis_ref, app_start_func){
+toggle_window_vis(win_title, app_start_func, enable_win_group := True){
     DetectHiddenWindows True
-    if !WinExist(win_title)
-        return (app_start_func(), toggle_vis_ref := True)
-    winactive(win_title) and toggle_vis_ref ; be covered but no hide
-    ? (WinHide(win_title), toggle_vis_ref := False)
-    : (WinShow(win_title), Winactivate(win_title), toggle_vis_ref := True)
+
+    if not enable_win_group
+        group_name := win_title
+    else {
+        group_name := RegExReplace(win_title, "[^a-zA-Z0-9]", "")
+        GroupAdd(group_name, win_title) ; all sub win
+        group_name := "ahk_group " group_name
+    }        
+
+    if !WinExist(group_name)
+        return (app_start_func(), TOGGLE_APP_DICT[group_name] := True)
+
+    winactive(group_name) and TOGGLE_APP_DICT.get(group_name, False) ; be covered but no hide
+    ? (WinHide(group_name), TOGGLE_APP_DICT[group_name] := False)
+    : (WinShow(group_name), Winactivate(group_name), TOGGLE_APP_DICT[group_name] := True)
 }
 
 toggle_cliptoy_gui(unique_title:="ClipBoard_Buffer_Search"){ ; toggle(create/show --- hide)
@@ -1783,8 +1780,8 @@ toggle_cliptoy_gui(unique_title:="ClipBoard_Buffer_Search"){ ; toggle(create/sho
     if !IsSet(clip_pin_buffer)               
         global clip_pin_buffer := ListSet() ; Flaw
 
-    static __TOGGLE_CLIPTOY_VIS__ := False
-    toggle_window_vis(unique_title,&__TOGGLE_CLIPTOY_VIS__, () => create_cliptoy_search_gui(unique_title, &__TOGGLE_CLIPTOY_VIS__))
+    static __TOGGLE_CLIPTOY_VIS__ := False ; keep alone
+    toggle_window_vis(unique_title,() => create_cliptoy_search_gui(unique_title, &__TOGGLE_CLIPTOY_VIS__))
 }
 ; ___________________________________________________________________________Main$
 ; ________________________________________________________________________________Standalone cliptoy$
