@@ -1751,6 +1751,7 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
 
 
 toggle_window_vis(win_title, app_start_func, enable_win_group := True){
+    SetWinDelay -1
     DetectHiddenWindows True
 
     if not enable_win_group
