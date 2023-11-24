@@ -800,6 +800,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 
 ;;;;;;;;;;;;;;;;;;;;;;;; 🧱Tools For Python
 ; headers kv-pair string  =>  python-dict format
+#u::Run subl "D:\lin\dump-app\U-P\UP.md",, "Hide"
 #h::Run subl SCRIPT_ROOT_PATH "config\application.cfg"
 #j::Run python SCRIPT_ROOT_PATH "tool\headers_to_dict.py",, "Hide"
 #+j::Run python SCRIPT_ROOT_PATH "tool\json_format_mini.py",, "Hide"
@@ -807,6 +808,11 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 ^TOGGLE APP
+#HotIf WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1") or WinActive("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1")
+^n::Send("t")
+#HotIf
+
+
 !`:: ; replace Terminal: Quake Mode
 {
     callback := () => open_cmd(open_mode:=1)
