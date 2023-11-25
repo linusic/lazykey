@@ -537,25 +537,11 @@ open_cmd(open_mode:=0)
 }
 
 ;;;;;;;;; SHOW/HIDE DESKTOP ICON
-control_visible(control_title, win_title)
-{
-    is_visible := ControlGetVisible(control_title, win_title)
-    return is_visible
-}
-control_show(control_title, win_title)
-{
-    if control_visible(control_title, win_title)
-        ControlHide(control_title, win_title)
-}
-control_hide(control_title, win_title)
-{
-    if not control_visible(control_title, win_title)
-        ControlShow(control_title, win_title)
-}
 control_toggle_visible(control_title, win_title)
 {
-    visiable := control_visible(control_title, win_title)
-    visiable ? ControlHide(control_title, win_title) : ControlShow(control_title, win_title)
+    ControlGetVisible(control_title, win_title)
+    ? ControlHide(control_title, win_title)
+    : ControlShow(control_title, win_title)
 }
 
 ; bind & on system
@@ -750,7 +736,6 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:falinp::f(SCRIPT_ROOT_PATH "hotstr\linp.py")
 :X:fabdtool::f(SCRIPT_ROOT_PATH "hotstr\bdtool.py")
 :X:faflask::f(SCRIPT_ROOT_PATH "hotstr\flask.py")
-:X:fafastapi::f(SCRIPT_ROOT_PATH "hotstr\fastapi.py")              ; translate main
 :X:fatrans::f(SCRIPT_ROOT_PATH "tool\old_translator\translate.py") ; translate
 :X:famail::f(SCRIPT_ROOT_PATH "hotstr\mail.py")                    ; mail
 :X:fareq::f(SCRIPT_ROOT_PATH "hotstr\req.py")                      ; httpx
@@ -775,7 +760,8 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:fabuild::f(SCRIPT_ROOT_PATH "hotstr\build.py")                  ; build pyproject.toml
 :X:fatype::f(SCRIPT_ROOT_PATH "hotstr\type.py")                    ; type hint for Literal
 :X:fapool::f(SCRIPT_ROOT_PATH "hotstr\pool.py")                    ; proxy pool
-:X:favoice::f(SCRIPT_ROOT_PATH "hotstr\voice.py")                   ; pyttsx3
+:X:favoice::f(SCRIPT_ROOT_PATH "hotstr\voice.py")                  ; pyttsx3
+:X:fafast::f(SCRIPT_ROOT_PATH "hotstr\fastapi.py")                 ; fastapi main
 
 
 ; ----------------- for rs
@@ -808,9 +794,9 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 ^TOGGLE APP
-#HotIf WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1") or WinActive("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1")
-^n::Send("t")
-#HotIf
+; #HotIf WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1") or WinActive("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1")
+; ^n::Send("t")
+; #HotIf
 
 
 !`:: ; replace Terminal: Quake Mode
@@ -832,7 +818,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 }
 <!+w::Run(
     "C:\Program Files\Google\Chrome\Application\chrome.exe"
-    " --incognito www.google.com"
+    " --incognito"
 ) ; anonymous
 
 <!e::
@@ -852,7 +838,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 <!2::
 {
     callback := () => Run("E:\app\vlc\vlc.exe")
-    toggle_window_vis("ahk_exe vlc.exe ahk_class Qt5QWindowIcon", callback)
+    toggle_window_vis("ahk_exe vlc.exe ahk_class Qt5QWindowIcon", callback, ["Adjustments and Effects", "Current Media Information"])
 }
 #HotIf WinActive("ahk_exe vlc.exe")
 <!+2::Send("^l") ; toggle vlc playlist
@@ -1001,7 +987,7 @@ add_item_config(index, path, icon_or_text, is_app){
 }
 
 
-get_visiable_windows(exclude_window_titles*){
+get_visible_windows(exclude_window_titles*){
     windows := []
     for this_id in WinGetList(,, "Program Manager") {
         this_ahk_exe := WinGetProcessName(this_id)
@@ -1074,7 +1060,7 @@ get_visiable_windows(exclude_window_titles*){
 ;     }
 ;     __on_change(edit, *){
 ;         cur_input := search_edit.Value
-;         windows := get_visiable_windows(search_gui_title)
+;         windows := get_visible_windows(search_gui_title)
 
 ;         search_lv.delete()
 ;         ; when clear edit
@@ -1531,7 +1517,7 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
         ["","<Enter>: Both (Edit+LV), the <Enter> will auto paste the First Row if no select. such as <Win+V>"],
         ["","the native <CTRL>/<SHIFT> + <HOME>/<END>/... is still universal, more in SRC Code: __lv_key_down"],
         [sep_line_first_col, sep_line_second_col],
-        ["NOTE", "the hotkey: re-press the launch hotkey(if not change) => '<!s' will toggle the GUI visiable: show/hide"],
+        ["NOTE", "the hotkey: re-press the launch hotkey(if not change) => '<!s' will toggle the GUI visible: show/hide"],
         ["",Format("the search: column `ID` is redundant for search(filter) or Sort(Click Header)", syntax_symbol)],
         ["","the click: <Double LButton> can auto Copy and Paste in to your main window such as <WIN+V>"],
         [sep_line_first_col, sep_line_second_col],
@@ -1756,24 +1742,36 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
 }
 
 
-toggle_window_vis(win_title, app_start_func, enable_win_group := True){
-    SetWinDelay -1
+toggle_window_vis(win_title, app_start_func, exclude_win_titles := False){
     DetectHiddenWindows True
+    SetWinDelay -1
 
-    if not enable_win_group
-        group_name := win_title
-    else {
-        group_name := RegExReplace(win_title, "[^a-zA-Z0-9]", "")
-        GroupAdd(group_name, win_title) ; all sub win
-        group_name := "ahk_group " group_name
-    }        
+    ; dep class ListSet
+    ls := ListSet() 
+    if exclude_win_titles
+        ls.update(exclude_win_titles)
 
-    if !WinExist(group_name)
-        return (app_start_func(), TOGGLE_APP_DICT[group_name] := True)
+    _ahk_id := 0
+    for _id in WinGetList(win_title)
+        if _id
+            if win_title := WinGetTitle(_id){
+                ; if exclude_win_titles and win_title == exclude_win_titles
+                if exclude_win_titles and ls.in(win_title)
+                    continue
+                else {
+                    _ahk_id := _id
+                    break
+                }
+            }
+    
+    title := "ahk_id " _ahk_id
 
-    winactive(group_name) and TOGGLE_APP_DICT.get(group_name, False) ; be covered but no hide
-    ? (WinHide(group_name), TOGGLE_APP_DICT[group_name] := False)
-    : (WinShow(group_name), Winactivate(group_name), TOGGLE_APP_DICT[group_name] := True)
+    if !WinExist(title)
+        return (app_start_func(), TOGGLE_APP_DICT[title] := True)
+
+    winactive(title) and TOGGLE_APP_DICT.get(title, False) ; be covered but no hide
+    ? (WinHide(title), TOGGLE_APP_DICT[title] := False)
+    : (WinShow(title), Winactivate(title), TOGGLE_APP_DICT[title] := True)
 }
 
 toggle_cliptoy_gui(unique_title:="ClipBoard_Buffer_Search"){ ; toggle(create/show --- hide)
