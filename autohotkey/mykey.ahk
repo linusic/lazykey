@@ -297,7 +297,6 @@ CoordMode "Tooltip", "screen"
 <+m::Send "+-"
 <+l::Send "="
 <+h::Send "+="
-<+t::Send "\n"
 <+w::Send "*"
 
 ; [Screen In WindowOS]
@@ -714,6 +713,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 ; }
 
 ::faff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a copy output.mp4 ; m3u8 => mp4: file '<file_path>' ;  / instead of \ if not ''
+::fafff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a aac output.mp4
 ::faffft::ffmpeg -f concat -safe 0 -i input.txt -segment_time_metadata 1 -vf select=concatdec_select -af aselect=concatdec_select,aresample=async=1 output.mp4
 
 :X:faip::Send("127.0.0.1")
@@ -816,10 +816,12 @@ escape_send_hotstring(hot_string, right_char_count:=0){
     }
     toggle_window_vis("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1", callback)
 }
-<!+w::Run(
-    "C:\Program Files\Google\Chrome\Application\chrome.exe"
-    " --incognito"
-) ; anonymous
+<!+w::Run("C:\Program Files\Google\Chrome\Application\chrome.exe" " --incognito") ; anonymous
+>!w::Run("C:\Program Files\Google\Chrome\Application\chrome.exe " "chrome-extension://dbepggeogbaibhgnhhndojpepiihcmeb/pages/completion_engines.html")
+#HotIf WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1")
+<+t::Send("^n")
+#HotIf
+
 
 <!e::
 {
@@ -1751,7 +1753,9 @@ toggle_window_vis(win_title, app_start_func, exclude_win_titles := False){
     if exclude_win_titles
         ls.update(exclude_win_titles)
 
-    _ahk_id := 0
+
+    ahk_id_arr := []
+
     for _id in WinGetList(win_title)
         if _id
             if win_title := WinGetTitle(_id){
@@ -1759,19 +1763,21 @@ toggle_window_vis(win_title, app_start_func, exclude_win_titles := False){
                 if exclude_win_titles and ls.in(win_title)
                     continue
                 else {
-                    _ahk_id := _id
-                    break
+                    ahk_id_arr.push("ahk_id " _id)
                 }
             }
-    
-    title := "ahk_id " _ahk_id
 
-    if !WinExist(title)
-        return (app_start_func(), TOGGLE_APP_DICT[title] := True)
+    group_name := RegExReplace(win_title, "[^a-zA-Z0-9]", "")
+    for a_id in ahk_id_arr
+        GroupAdd(group_name, a_id)
+    group_name := "ahk_group " group_name
 
-    winactive(title) and TOGGLE_APP_DICT.get(title, False) ; be covered but no hide
-    ? (WinHide(title), TOGGLE_APP_DICT[title] := False)
-    : (WinShow(title), Winactivate(title), TOGGLE_APP_DICT[title] := True)
+    if !WinExist(group_name)
+        return (app_start_func(), TOGGLE_APP_DICT[group_name] := True)
+
+    winactive(group_name) and TOGGLE_APP_DICT.get(group_name, False) ; be covered but no hide
+    ? (WinHide(group_name), TOGGLE_APP_DICT[group_name] := False)
+    : (WinShow(group_name), Winactivate(group_name), TOGGLE_APP_DICT[group_name] := True)
 }
 
 toggle_cliptoy_gui(unique_title:="ClipBoard_Buffer_Search"){ ; toggle(create/show --- hide)
