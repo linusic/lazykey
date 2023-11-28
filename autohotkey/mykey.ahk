@@ -119,14 +119,12 @@ cp_path()
 ; _____________________________________________________________________ 🖥️For Switch Screen (effect below all RAlt)
 win_prev(){
     Send "!{ESC}"   ; ←
-    if WinActive("A")    ;  tooltip WinActive("A")
-        WinActivate("A")
+    try WinActivate("A")
 }
 
 win_next(){
     Send "!+{ESC}"  ; →
-    if WinActive("A")
-        WinActivate("A")
+    try WinActivate("A")
 }
 
 
@@ -1631,7 +1629,10 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
     }
 }
 
-
+win_activate_current_cursor(){
+    MouseGetPos(,,&id)
+    winactivate(id)
+}
 toggle_window_vis(win_title, app_start_func, exclude_win_titles := False){
     DetectHiddenWindows True
     SetWinDelay -1
@@ -1664,7 +1665,7 @@ toggle_window_vis(win_title, app_start_func, exclude_win_titles := False){
         return (app_start_func(), TOGGLE_APP_DICT[group_name] := True)
 
     winactive(group_name) and TOGGLE_APP_DICT.get(group_name, False) ; be covered but no hide
-    ? (WinHide(group_name), TOGGLE_APP_DICT[group_name] := False)
+    ? (WinHide(group_name), TOGGLE_APP_DICT[group_name] := False, win_activate_current_cursor())
     : (WinShow(group_name), Winactivate(group_name), TOGGLE_APP_DICT[group_name] := True)
 }
 
