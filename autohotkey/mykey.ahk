@@ -1,6 +1,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;   AHK V2.0.0  ;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; _____________________________________________________________________
 SCRIPT_ROOT_PATH := A_SCRIPTDIR "\"
 USER_PATH := "C:\Users\" A_UserName "\"
 
@@ -12,11 +14,29 @@ CLIP_ROOT_DIR := "E:\app\clipboard"
 APP_CONFIG_PATH := SCRIPT_ROOT_PATH "config\application.cfg"  ; #h
 APP_BACKGROUND_IMAGE_APP := SCRIPT_ROOT_PATH "image\bg.png"
 APP_BACKGROUND_IMAGE_FOLDER := SCRIPT_ROOT_PATH "image\bg.png"
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; _____________________________________________________________________
 
-;;;;;;;;;;;;;;;;;;;;;;;;;
+; _____________________________________________________________________ Browser (Vimmum Tab)
+CHROME_PATH := "C:\Program Files\Google\Chrome\Application\chrome.exe"
+EDGE_PATH := "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+chrome_cmd         := CHROME_PATH " chrome-extension://dbepggeogbaibhgnhhndojpepiihcmeb/pages/completion_engines.html"
+chrome_cmd_private := CHROME_PATH  " --incognito"
+edge_cmd         := EDGE_PATH " chrome-extension://dbepggeogbaibhgnhhndojpepiihcmeb/pages/blank.html"
+edge_cmd_private := EDGE_PATH  " --inprivate"
+; ______________
+browser_new_tab(){ ; for +t and mouse gesture (MButton)
+    if WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1")
+        Run(chrome_cmd)
+    else if WinActive("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1")
+        Run(edge_cmd)
+    else ; subl / vsc / ...
+        Send("^n")
+}
+<+t::browser_new_tab
+
+; _____________________________________________________________________ Toggle Window Global Dict
 TOGGLE_APP_DICT := Map()
-;;;;;;;;;;;;;;;;;;;;;;;;;
+; _____________________________________________________________________
 
 ; SetTitleMatchMode 2   ; (default) windows just need contains <WinTitle>
 SendMode "Input"
@@ -29,7 +49,7 @@ current_dpi := A_ScreenDPI
 screen_scale := current_dpi / stable_dpi
 screen_width := A_ScreenWidth / screen_scale
 screen_height := A_Screenheight / screen_scale
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Python & Subl
+; _____________________________________________________________________ Python & Subl
 choose_python(path){
     return FileExist(path) ? path " " : "python "
 }
@@ -51,7 +71,7 @@ subl_in_explorer(){
         return  ; ; (!path) ? Run(subl) : Run(subl Format('"{1}\tempFile"', path))
     Run(subl Format('"{1}\tempFile"', path)) ; InputBox? No! Commadn Palette => rename in ST
 }
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Browser & Explorer => URL
+; _____________________________________________________________________ Browser & Explorer => URL
 >!F5::Reload
 
 >!u:: ; cover <!
@@ -81,7 +101,7 @@ cp_path()
     Send("{ESC 2}")   ; twice for Explorer and Edge
 }
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; remap -> numbers
+; _____________________________________________________________________ remap -> numbers
 ; Capslock & h::Send "0" ;
 ; Capslock & j::Send "1"
 ; Capslock & k::Send "2"
@@ -96,7 +116,7 @@ cp_path()
 ; Capslock & m::Send "0" ;
 ; Capslock & n::Send "0"
 ; Capslock & Space::Space
-;;;;;;;;;;;;;;;;;;;;; 🖥️For Switch Screen (effect below all RAlt)
+; _____________________________________________________________________ 🖥️For Switch Screen (effect below all RAlt)
 win_prev(){
     Send "!{ESC}"   ; ←
     if WinActive("A")    ;  tooltip WinActive("A")
@@ -122,7 +142,7 @@ win_next(){
 ;;; jump and re-jump
 <!+s::Send "{F12}"  ; F12 is vsc
 
-;;;;;;;;;;;;;;;;;;;;; 💻Terminal
+; _____________________________________________________________________ 💻Terminal
 ; RUN "wt.exe -F -w _quake pwsh.exe -nologo -window hided"
 
 ; edit ahk config by subl
@@ -133,21 +153,21 @@ win_next(){
 +F4::Suspend  ; Ctrl+Alt+S
 #SuspendExempt False
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 ChatGPT
+; _____________________________________________________________________ 🧲🧲🧲 ChatGPT
 >!CapsLock::
 {
     callback := () => Run(python SCRIPT_ROOT_PATH "app\palm\main.py",, "hide")
     toggle_window_vis("PaLM ahk_class TkTopLevel", callback)
 }
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 New Translator
+; _____________________________________________________________________ 🧲🧲🧲 New Translator
 <!CapsLock::
 {
     callback := () => Run(python SCRIPT_ROOT_PATH "app\translator\main.py",, "hide")
     toggle_window_vis("Translator ahk_class TkTopLevel", callback)
 }
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 M3U8 Downloader
+; _____________________________________________________________________ 🧲🧲🧲 M3U8 Downloader
 +F1::
 {
     IB := InputBox("🧲🧲🧲🧲🧲🧲M3U8 PATH", "🧲M3U8 PATH", "w900 h150")
@@ -156,7 +176,7 @@ win_next(){
         RunWait CMD
     }
 }
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 Send Input
+; _____________________________________________________________________ 🧲🧲🧲 Send Input
 ; +F3::
 ~^+f::
 {
@@ -168,14 +188,14 @@ win_next(){
     }
 }
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 OCR
+; _____________________________________________________________________ 🧲🧲🧲 OCR
 >!\::
 {
     Run python SCRIPT_ROOT_PATH "app\clipocr\main.py",, "hide"
 }
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 Bulk Rename Syntax
+; _____________________________________________________________________ 🧲🧲🧲 Bulk Rename Syntax
 +F2::copy_filenames_open_editor()
 !F2::Run python SCRIPT_ROOT_PATH "app\rename\bulk_rename.py",, "hide"
 #b::Run subl USER_PATH ".rename.log"
@@ -244,14 +264,14 @@ CoordMode "Caret", "Window"
 ; if for test , maybe change it to "Window"
 CoordMode "Tooltip", "screen"
 
-;;;;;;;;;;;;;;;;;;;;;;;;; Block All Menu for RALT
+; _____________________________________________________________________ Block All Menu for RALT
 ; ~RAlt::Send "^{space}"       ; 🛑IME need open (Ctrl and Ctrl+Space) 💧 drop 4keys: #
 *#space::Send "{Ctrl}"     ; BLOCK => IME => ... + win + space
 
 <!space::Send "{ENTER}"
 ; <^space::Send "{ENTER}"    ;  TODO chrome
 
-;;;;;;;;;;;;;;;;;;;;;;;;;  HotKey ReMap
+; _____________________________________________________________________  HotKey ReMap
 ^-::Send "^{WheelDown}"
 ^=::Send "^{WheelUp}"
 ; mouse wheel
@@ -306,7 +326,7 @@ CoordMode "Tooltip", "screen"
 
 <+o::Send "^!{tab}"
 
-; mmmm ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🖱️ Replace Mouse
+; _____________________________________________________________________ 🖱️ Replace Mouse
 ;;; 2:   =>(0,100) =>  (fast, lowest)
 ;;; "R"  => Relative
 
@@ -336,15 +356,11 @@ CapsLock & g::Click "Right"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CapsLock & e::SendEvent "{Click Down}"
 CapsLock & r::SendEvent "{Click Up}"
-; mmmm ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🖱️ Replace Mouse
-
-
-;;;;;;;;;;;;;;; 🛑Terminal Only For [Bash Core] ;;;;; (the Condition must be fully)
+; _____________________________________________________________________ 🛑Terminal Only For [Bash Core] ;;;;; (the Condition must be fully)
 #HotIf WinActive("ahk_exe WindowsTerminal.exe") and WinActive("@")
 !i::Send "{ESC}{backspace}"
 #HotIf
-
-;;;;;;;;;;;;;;; 🛑Terminal Only For [CMD Core] ;;;;;; (the Condition must be fully)
+; _____________________________________________________________________ 🛑Terminal Only For [CMD Core] ;;;;;; (the Condition must be fully)
 #HotIf WinActive("ahk_exe WindowsTerminal.exe") and not WinActive("@")
 ; [delete to head]
 ;^u::Send "{ESC}"
@@ -353,8 +369,7 @@ CapsLock & r::SendEvent "{Click Up}"
 ^k::Send "^{END}"
 <!i::Send "^{backspace}"
 #HotIf
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Windows APP (Not Contain Windows Terminal)
+; _____________________________________________________________________ Windows APP (Not Contain Windows Terminal)
 #HotIf not WinActive("ahk_exe WindowsTerminal.exe")
 ; [Undo]
 <!i::Send "^{backspace}"
@@ -383,7 +398,7 @@ LALT & 0::Send "{XButton2}"
 LAlt & RAlt::Send "{esc}"
 #HotIf
 
-;;;;;;;; Toggle WinOS Proxy
+;  _____________________________________________________________________ Toggle WinOS Proxy
 <!6::set_proxy_port()
 >!6::set_proxy_port("by input")
 set_proxy_port(port := -1)
@@ -402,7 +417,7 @@ set_proxy_port(port := -1)
     TrayTip ; no args => rep hide
 }
 
-;;;;  Toggle WIFI
+; _____________________________________________________________________ Toggle WIFI
 >!DELETE::
 {
     wifi_name := "‏‏‎ ‎"
@@ -434,7 +449,7 @@ open_folder(condition_cmd, use_file:=true)
     }
 }
 
-;;; for cmd alias
+; _____________________________________________________________________ for cmd alias
 alias_dos_keys := (
     ; only for CMD
     '& doskey cd = cd /D $* '
@@ -451,7 +466,7 @@ alias_dos_keys := (
     '& doskey clear = for /L %i in (1,1,100) do @echo. && echo. '
 )
 
-;;; cccc   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;     for ^+e
+; _____________________________________________________________________ for ^+e
 choice_for_open_cmd(path, open_mode)
 {
     ; NOTE: Tail Space
@@ -509,7 +524,7 @@ open_cmd(open_mode:=0)
 ;     open_folder(condition_cmd, use_file:=true)
 ; }
 
-;;; WinAPP
+; _____________________________________________________________________ WinAPP
 #a::Run "appwiz.cpl"  ; ; App Remove
 ; #b::Run "::{645ff040-5081-101b-9f08-00aa002f954e}"  ; bin
 #i::Run "::{7007acc7-3202-11d1-aad2-00805fc1270e}"  ; ncpa.cpl
@@ -535,7 +550,7 @@ open_cmd(open_mode:=0)
     RUN("explorer " smart_path)
 }
 
-;;;;;;;;; SHOW/HIDE DESKTOP ICON
+; _____________________________________________________________________ SHOW/HIDE DESKTOP ICON
 control_toggle_visible(control_title, win_title)
 {
     ControlGetVisible(control_title, win_title)
@@ -555,7 +570,7 @@ toggle_desktop()
 }
 toggle_desktop()
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧱Replace WGestures
+; _____________________________________________________________________ 🧱Replace WGestures
 ; Mouse Gestures
 RButton::
 {
@@ -636,12 +651,12 @@ MButton:: ; ↓
     else if (abs(x1-x2) < (y2-y1) and (y2-y1) > allow_distance * 3) ; ↓ :y2 > y1 (pretect)
         Send "^w"
     else if (abs(x1-x2) < (y1-y2) and (y1-y2) > allow_distance) ; ↑ :y2 < y1
-        Send "^c"
+        browser_new_tab()
     else   ; No Move
         Send "^{LBUTTON}"
 }
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧱Hot String For Python
+; _____________________________________________________________________ 🧱Hot String For Python
 f(file_name,callback_send:="",encoding:="UTF-8")
 {
     ClipData := FileRead(file_name, encoding)
@@ -657,10 +672,14 @@ f(file_name,callback_send:="",encoding:="UTF-8")
 }
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧱Live Template
+; _____________________________________________________________________ 🧱Live Template
 :X:fahelp::f(SCRIPT_ROOT_PATH "hotstr\help.txt")
 :X:fagen::f(SCRIPT_ROOT_PATH "gen_vbs.py")
 :X:favbs::f(SCRIPT_ROOT_PATH "gen_vbs.py")
+
+:*x:fdHo::RUN(subl "C:\Windows\System32\drivers\etc\hosts")
+:*x:fdPo::RUN(subl Format("C:\Users\{1}\Documents\PowerShell\Microsoft.PowerShell_profile.ps1", A_UserName))
+:*x:fdSS::RUN(subl "E:\app\ssr\ss_conf_command\ssr.txt")
 
 ; for simple string
 :*x:ipip::Run(python "-c `"import httpx, pyperclip as p;result = httpx.get('http://httpbin.org/get').json()['origin'];p.copy(result)`"",, "hide")
@@ -698,19 +717,6 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :RX:fapip::escape_send_hotstring("pip install -q -U ", 18)
 :RX:fapipw::escape_send_hotstring("pip install -U    > nul", 16)
 :RX:fapipe::escape_send_hotstring("pip install -U    > nul 2>&1", 16)
-
-; :R:fafp::
-; {
-;     s := 'print(f"{{}  =  {}}")'
-;     s_move := "{HOME}{RIGHT 9}"
-;     SendInput(s s_move)
-; }
-; :R:fapipi::
-; {
-;     s := "pip install -U    > nul 2>&1"
-;     s_move := "{HOME}{RIGHT 16}"
-;     SendInput(s s_move)
-; }
 
 ::faff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a copy output.mp4 ; m3u8 => mp4: file '<file_path>' ;  / instead of \ if not ''
 ::fafff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a aac output.mp4
@@ -791,46 +797,21 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 #j::Run python SCRIPT_ROOT_PATH "tool\headers_to_dict.py",, "Hide"
 #+j::Run python SCRIPT_ROOT_PATH "tool\json_format_mini.py",, "Hide"
 
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 ^TOGGLE APP
-; #HotIf WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1") or WinActive("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1")
-; ^n::Send("t")
-; #HotIf
-
-
-!`:: ; replace Terminal: Quake Mode
-{
-    callback := () => open_cmd(open_mode:=1)
-    toggle_window_vis("ahk_class CASCADIA_HOSTING_WINDOW_CLASS", callback)
-}
-
+; _____________________________________________________________________ 🧲🧲🧲 ^TOGGLE APP
 <!w::
 {
-    callback(){
-        Run(
-            "C:\Program Files\Google\Chrome\Application\chrome.exe "
-            "chrome-extension://dbepggeogbaibhgnhhndojpepiihcmeb/pages/completion_engines.html"
-            ; "--start-fullscreen chrome-extension://dbepggeogbaibhgnhhndojpepiihcmeb/pages/completion_engines.html"
-        )
-    }
+    callback := () => Run(chrome_cmd)
     toggle_window_vis("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1", callback)
 }
-<!+w::Run("C:\Program Files\Google\Chrome\Application\chrome.exe" " --incognito") ; anonymous
->!w::Run("C:\Program Files\Google\Chrome\Application\chrome.exe " "chrome-extension://dbepggeogbaibhgnhhndojpepiihcmeb/pages/completion_engines.html")
-#HotIf WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1")
-<+t::Send("^n")
-#HotIf
-
+<!+w::Run(chrome_cmd_private) ; anonymous
 
 <!e::
 {
-    callback := () => Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
+    callback := () => Run(edge_cmd)
     toggle_window_vis("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1", callback)
 }
-<!+e::Run("C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe --inprivate")
+<!+e::Run(edge_cmd_private)
 
-<^1::
 <!1::
 {
     callback := () => Run("D:\ide\vscode\Code.exe")
@@ -860,16 +841,14 @@ open_explorer(){
 }
 
 
+!`:: ; replace Terminal: Quake Mode
+{
+    callback := () => open_cmd(open_mode:=1)
+    toggle_window_vis("ahk_class CASCADIA_HOSTING_WINDOW_CLASS", callback)
+}
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 TOGGLE APP$
-
-; ;;;;;;;;;;; 📄File (No GUI)
-:*x:fdHo::RUN(subl "C:\Windows\System32\drivers\etc\hosts")
-:*x:fdPo::RUN(subl Format("C:\Users\{1}\Documents\PowerShell\Microsoft.PowerShell_profile.ps1", A_UserName))
-:*x:fdSS::RUN(subl "E:\app\ssr\ss_conf_command\ssr.txt")
-
+; __________________________________________________________________________________________ ⌨ START GUI
 ;; ffff (for unique search) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ⌨ KeyMap For (FA and FD)
 ; ^1::GUI_APP.Show("AutoSize Maximize")
 ; ^2::GUI_FD.Show("AutoSize Maximize")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  🅰️ APP(FA)
@@ -1010,105 +989,14 @@ get_visible_windows(exclude_window_titles*){
     }
     return windows
 }
+; __________________________________________________________________________________________ END GUI
 
-
-; window_search_app(search_gui_title){
-;     root_font_size := 15
-
-;     width := A_ScreenWidth / 2
-;     height := A_ScreenHeight / 1.9
-
-;     __when_start_cur_window_title := WinGetTitle("A")
-
-;     search_gui:= Gui("-Resize +ToolWindow -Caption", search_gui_title)
-;     search_gui.MarginX := 0
-;     search_gui.MarginY := 0
-;     search_gui.setFont("s" root_font_size)
-;     ; WinSetAlwaysOnTop 1, search_gui  replaced by re-activate idea
-
-;     ;;; ROOT
-;     search_gui.OnEvent("Escape", __destroy)
-;     search_gui.OnEvent("ContextMenu", __destroy) ; TODO(More)
-
-;     ;;; Edit
-;     edit_height := root_font_size*2
-;     search_edit := search_gui.AddEdit(Format("c09C0C5 +BackgroundBlack w{1} h{2}", width, edit_height))
-;     search_edit.OnEvent("Change", __on_change)
-;     search_edit.OnEvent("LoseFocus", __on_lose_focus)
-
-
-;     ; list view
-;     search_lv := search_gui.Add("ListView", Format("c09C0C5 +BackgroundBlack w{1} h{2} 0x4000 -Hdr", width, height-edit_height), ["", ""])
-;     first_cell_pixels := 15 * root_font_size  ;  max 15 chars
-;     search_lv.ModifyCol(1, first_cell_pixels)
-;     search_lv.ModifyCol(2, width - 100 - first_cell_pixels)
-
-;     search_lv.OnEvent("ItemFocus", __on_focus)
-;     search_lv.OnEvent("LoseFocus", __on_lose_focus)
-
-;     ; call
-;     __on_change(search_lv)
-;     search_edit.Focus()
-;     search_gui.Show(Format("w{1} h{2}", width, height))
-
-;     __destroy(*){
-;         search_gui.destroy()
-;     }
-;     __on_lose_focus(*){
-;         winactivate search_gui
-;     }
-;     __on_focus(lv_item, item_index, *){
-;         winactivate lv_item.GetText(item_index, 2)  ; 2: AHK_TITLE
-;     }
-;     __on_change(edit, *){
-;         cur_input := search_edit.Value
-;         windows := get_visible_windows(search_gui_title)
-
-;         search_lv.delete()
-;         ; when clear edit
-;         if not cur_input {
-;             for exe_title_pair in windows
-;                 search_lv.Add(, exe_title_pair[1], exe_title_pair[2])
-
-;             __restore_window()
-;             return
-;         }
-
-;         search_not_exist := True
-;         for exe_title_pair in windows
-;             ; if InStr(exe_title_pair[1], cur_input) or InStr(exe_title_pair[2], cur_input){
-;             if RegExMatch(exe_title_pair[1] exe_title_pair[2], "i)" StrReplace(cur_input, " ", ".*")){
-;                 search_not_exist := False
-;                 search_lv.Add(, exe_title_pair[1], exe_title_pair[2])
-;             }
-;         if search_not_exist
-;             return
-
-;         ; search_lv.Modify(1, "Select")
-;         WinActivate search_lv.GetText(1, 2)  ; Always Activate First
-;     }
-
-;     __restore_window(){
-;         winactivate __when_start_cur_window_title
-;     }
-; }
-
-; !+a::
-; {
-;     search_gui_title := "Search_Preview_Window"
-;     if Winexist(search_gui_title)
-;         Winactivate search_gui_title
-
-;     else
-;         window_search_app(search_gui_title)
-; }
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 🧲🧲🧲 cliptoy
+; _______________________________________________________________________________________________ 🧲🧲🧲 START cliptoy
 /*
 ┌───────────────────────────────────────────────────────────────────────────┐
 │ AutoHotkey(V2.0.0+): https://github.com/AutoHotkey/AutoHotkey/releases    │
 └───────────────────────────────────────────────────────────────────────────┘
 */
-
 ; ________________________________________________________________________________^Standalone cliptoy
 ; _____________________________________________^Need Config 
 SetWinDelay -1
@@ -1796,3 +1684,4 @@ toggle_cliptoy_gui(unique_title:="ClipBoard_Buffer_Search"){ ; toggle(create/sho
 }
 ; ___________________________________________________________________________Main$
 ; ________________________________________________________________________________Standalone cliptoy$
+; _______________________________________________________________________________________________ END cliptoy
