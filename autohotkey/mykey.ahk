@@ -577,16 +577,18 @@ RButton::
     Keywait "RButton"
     mousegetpos &x2, &y2
 
-    if (x1-x2 > allow_distance and abs(y1-y2) < (x1-x2) )       ; ← :x2 < x1
-        send "^#{Left}"
-    else if (x2-x1> allow_distance and abs(y1-y2) < (x2-x1) )   ; → :x2 < x1
-        send "^#{Right}"
-    else if (abs(x1-x2) < (y1-y2) and (y1-y2) > allow_distance) ; ↑ :y2 < y1
-        send "{F11}"
-    else if (abs(x1-x2) < (y2-y1) and (y2-y1) > allow_distance) ; ↓ :y2 > y1
-        send "#d"
-    else   ; No Move
-        send "{RButton}"
+    switch {
+        ; ←
+        case (x1-x2 > allow_distance) and (abs(y1-y2) < x1-x2): send("^#{Left}")
+        ; →
+        case (x2-x1 > allow_distance) and (abs(y1-y2) < x2-x1): send("^#{Right}")
+        ; ↑
+        case (abs(x1-x2) < y1-y2) and (y1-y2 > allow_distance): send("{F11}")
+        ; ↓
+        case (abs(x1-x2) < y2-y1) and (y2-y1 > allow_distance): send("#d")
+        ; raw
+        default: send("{RButton}")
+    }
 }
 
 XButton2:: ; ↑
@@ -596,19 +598,18 @@ XButton2:: ; ↑
     Keywait "XButton2"
     mousegetpos &x2, &y2
 
-    if (x1-x2 > allow_distance and abs(y1-y2) < (x1-x2) )       ; ← :x2 < x1
-        GUI_APP.Show("AutoSize Maximize")
-    else if (x2-x1> allow_distance and abs(y1-y2) < (x2-x1) )   ; → :x2 < x1
-        GUI_FD.Show("AutoSize Maximize")
-    else if (abs(x1-x2) < (y2-y1) and (y2-y1) > allow_distance) ; ↓ :y2 > y1
-        Send "#v"
-    else if (abs(x1-x2) < (y1-y2) and (y1-y2) > allow_distance) ; ↑ :y2 < y1
-    {   ; ^+e
-        condition_cmd := 'explorer.exe /select,'
-        open_folder(condition_cmd, use_file:=true)
+    switch {
+        ; ←
+        case (x1-x2 > allow_distance) and (abs(y1-y2) < x1-x2): GUI_APP.Show("AutoSize Maximize")
+        ; →
+        case (x2-x1 > allow_distance) and (abs(y1-y2) < x2-x1): GUI_FD.Show("AutoSize Maximize")
+        ; ↓
+        case (abs(x1-x2) < y2-y1) and (y2-y1 > allow_distance): Send("#v")
+        ; ↑
+        case (abs(x1-x2) < y1-y2) and (y1-y2 > allow_distance): open_folder('explorer.exe /select,', use_file:=true)
+        ; raw
+        default: send("{XButton2}")
     }
-    else   ; No Move
-        send "{XButton2}"
 }
 
 XButton1:: ; ↓
@@ -618,21 +619,22 @@ XButton1:: ; ↓
     Keywait "XButton1"
     mousegetpos &x2, &y2
 
-    if ( x2-x1 > allow_distance*2 )  and ( y2-y1 > allow_distance ) ; → ↓ or ↘
-        send "^{END}"
-    else if ( (x2-x1 > allow_distance*2) and (y1-y2 > allow_distance) ) ; → ↑ or ↗
-        send "^{HOME}"
-    else if (x1-x2 > allow_distance and abs(y1-y2) < (x1-x2) )  ; ← :x2 < x1
-        win_prev()
-    else if (x2-x1> allow_distance and abs(y1-y2) < (x2-x1) )   ; → :x2 < x1
-        win_next()
-    else if (abs(x1-x2) < (y2-y1) and (y2-y1) > allow_distance) ; ↓ :y2 > y1
-        open_cmd(open_mode:=1) ; powershell
-    else if (abs(x1-x2) < (y1-y2) and (y1-y2) > allow_distance) ; ↑ :y2 < y1
-        ; open_explorer()
-        Send "^!{tab}"
-    else   ; No Move
-        send "{XButton1}"
+    switch {
+        ; → ↓ or ↘
+        case (x2-x1 > allow_distance*2) and (y2-y1 > allow_distance): send("^{END}")
+        ; → ↑ or ↗
+        case (x2-x1 > allow_distance*2) and (y1-y2 > allow_distance): send("^{HOME}")
+        ; ←
+        case (x1-x2 > allow_distance) and (abs(y1-y2) < x1-x2): win_prev()
+        ; →
+        case (x2-x1 > allow_distance) and (abs(y1-y2) < x2-x1): win_next()
+        ; ↓ (PWSH)
+        case (abs(x1-x2) < y2-y1) and (y2-y1 > allow_distance): open_cmd(open_mode:=1)
+        ; ↑
+        case (abs(x1-x2) < y1-y2) and (y1-y2 > allow_distance): send("^!{tab}")
+        ; raw
+        default: send("{XButton1}")
+    }
 }
 
 MButton:: ; ↓
@@ -642,16 +644,26 @@ MButton:: ; ↓
     Keywait "MButton"
     mousegetpos &x2, &y2
 
-    if (x1-x2 > allow_distance and abs(y1-y2) < (x1-x2) )       ; ← :x2 < x1
-        send "^+{TAB}"
-    else if (x2-x1> allow_distance and abs(y1-y2) < (x2-x1) )   ; → :x2 < x1
-        send "^{TAB}"
-    else if (abs(x1-x2) < (y2-y1) and (y2-y1) > allow_distance * 3) ; ↓ :y2 > y1 (pretect)
-        Send "^w"
-    else if (abs(x1-x2) < (y1-y2) and (y1-y2) > allow_distance) ; ↑ :y2 < y1
-        browser_new_tab()
-    else   ; No Move
-        Send "^{LBUTTON}"
+    switch {
+        ; ↓ → or ↘
+        case (x2-x1 > allow_distance * 8) and (y2-y1 > allow_distance * 3): return ; safe (cancel) for ^w
+        ; ↓ ← or ↙
+        case (x1-x2 > allow_distance * 8) and (y2-y1 > allow_distance * 3): return
+        ; ↑ → or ↗
+        case (x2-x1 > allow_distance * 8) and (y1-y2 > allow_distance * 3): return
+        ; ↑ ← or ↖
+        case (x1-x2 > allow_distance * 8) and (y1-y2 > allow_distance * 3): return
+        ; ←
+        case (x1-x2 > allow_distance) and (abs(y1-y2) < x1-x2): send("^+{TAB}")
+        ; →
+        case (x2-x1 > allow_distance) and (abs(y1-y2) < x2-x1): send("^{TAB}")
+        ; ↓
+        case (abs(x1-x2) < y2-y1) and (y2-y1 > allow_distance * 3): Send("^w")
+        ; ↑
+        case (abs(x1-x2) < y1-y2) and (y1-y2 > allow_distance): browser_new_tab()
+        ; raw
+        default: Send("^{LBUTTON}")
+    }
 }
 
 ; _____________________________________________________________________ 🧱Hot String For Python
