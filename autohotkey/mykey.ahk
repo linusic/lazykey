@@ -263,6 +263,9 @@ CoordMode "Caret", "Window"
 CoordMode "Tooltip", "screen"
 
 ; _____________________________________________________________________ Block All Menu for RALT
+~RAlt::Send("^{SPACE}")
+>!SPACE::Send("{SPACE}") ; avoid block space
+
 ; ~RAlt::Send "^{space}"       ; 🛑IME need open (Ctrl and Ctrl+Space) 💧 drop 4keys: #
 *#space::Send "{Ctrl}"     ; BLOCK => IME => ... + win + space
 
@@ -1668,7 +1671,7 @@ toggle_window_vis(win_title, app_start_func, exclude_win_titles := False){
                 }
             }
 
-    group_name := RegExReplace(win_title, "[^a-zA-Z0-9]", "")
+    group_name := "AHK_" RegExReplace(win_title, "[^a-zA-Z0-9]", "")  ; not allow start with number 
     for a_id in ahk_id_arr
         GroupAdd(group_name, a_id)
     group_name := "ahk_group " group_name
