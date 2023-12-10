@@ -40,6 +40,14 @@ Get-Alias | ForEach-Object {
         Remove-Item -Path ("Alias:\" + $_.Name) -Force -ErrorAction "SilentlyContinue"
     }
 }
+function new_mkdir {  # replace pwsh mkdir with busybox
+    if ($args.Count -eq 0) {
+        Invoke-Expression $(where mkdir)
+    } else {
+        & (where mkdir) ($args -join " ")
+    }
+}
+Set-Alias mkdir new_mkdir
 
 ########## Conda
 function get-conda { cmd.exe "/K" D:/miniconda/Scripts/activate.bat D:/miniconda }
