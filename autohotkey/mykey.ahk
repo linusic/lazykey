@@ -400,22 +400,17 @@ LAlt & RAlt::Send "{esc}"
 #HotIf
 
 ;  _____________________________________________________________________ Toggle WinOS Proxy
-<!6::set_proxy_port()
->!6::set_proxy_port("by input")
-set_proxy_port(port := -1)
-{
+>!+1::set_proxy_port()
+set_proxy_port()
+{    
+    IB := InputBox("✈ INPUT LOCAL PROXY PORT", "Proxy Port", "w300 h100")
+    if IB.Result = "Cancel" and IB.Value = ""
+        return 
+
     A_Clipboard := ""
-    if (port == -1) 
-        Run python SCRIPT_ROOT_PATH "hotstr\proxy.py 127.0.0.1:8080",, "hide"
-    else {
-        IB := InputBox("✈ INPUT LOCAL PROXY PORT", "Proxy Port", "w300 h100")
-        if IB.Result != "Cancel" 
-            Run python SCRIPT_ROOT_PATH "hotstr\proxy.py 127.0.0.1:" IB.Value,, "hide"
-    }
-    ClipWait(1)
-    TrayTip A_Clipboard, "",16 + 32
-    Sleep 1000
-    TrayTip ; no args => rep hide
+    Run python SCRIPT_ROOT_PATH "hotstr\proxy.py 127.0.0.1:" IB.Value,, "hide"
+    ClipWait(2)
+    Msgbox(A_Clipboard)
 }
 
 ; _____________________________________________________________________ Toggle WIFI
@@ -738,6 +733,8 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:faip::Send("127.0.0.1")
 :X:faipip::Send("https://127.0.0.1")
 
+:X:fauni::Send("uni_str.encode('unicode-escape').decode('utf-8')")
+
 ; for windows HARD PRESS
 :*x:tata::Run("taskmgr")
 :X:fajs::f(SCRIPT_ROOT_PATH "hotstr\js.py")                        ; tamper(js)
@@ -757,7 +754,8 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:faflask::f(SCRIPT_ROOT_PATH "hotstr\flask.py")
 :X:fatrans::f(SCRIPT_ROOT_PATH "tool\old_translator\translate.py") ; translate
 :X:famail::f(SCRIPT_ROOT_PATH "hotstr\mail.py")                    ; mail
-:X:fareq::f(SCRIPT_ROOT_PATH "hotstr\req.py")                      ; httpx
+:X:fareq::f(SCRIPT_ROOT_PATH "hotstr\req.py")                      ; httpx simple
+:X:fareq2::f(SCRIPT_ROOT_PATH "hotstr\req2.py")                    ; httpx total
 :X:faproxy::f(SCRIPT_ROOT_PATH "hotstr\proxy.py")                  ; toggle winos proxy, and ALT & 3
 :X:fatext::f(SCRIPT_ROOT_PATH "hotstr\text.py")                    ; extract text from html
 :X:fawc::f(SCRIPT_ROOT_PATH "hotstr\wc.py")                        ; wordcloud
@@ -781,6 +779,8 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:fapool::f(SCRIPT_ROOT_PATH "hotstr\pool.py")                    ; proxy pool
 :X:favoice::f(SCRIPT_ROOT_PATH "hotstr\voice.py")                  ; pyttsx3
 :X:fafast::f(SCRIPT_ROOT_PATH "hotstr\fastapi.py")                 ; fastapi main
+:X:fasub::f(SCRIPT_ROOT_PATH "hotstr\sub.py")                      ; sub renew
+
 
 
 ; ----------------- for rs
@@ -849,6 +849,13 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 {
     open_explorer()
 }
+
+<!4::
+{
+    callback := () => Run("D:\ide\pycharm-community\bin\pycharm64.exe")
+    toggle_window_vis("ahk_exe pycharm64.exe", callback, exclude_win_titles := "theAwtToolkitWindow")
+}
+
 open_explorer(){
     Run "Explorer.exe",,"Max"  ; WinWait OS LANG dynamic
 }
@@ -1019,6 +1026,12 @@ SUBL_PATH := "D:\ide\Sublime\sublime_text.exe"
 clip_editor_path := SUBL_PATH  ; config the editor abs path, eg: C:\Windows\System32\notepad.exe
 #c::clip_open_file(clip_editor_path) ; or Syntax in GUI /open
 
+>!1::get_clip_item(-1)
+>!2::get_clip_item(-2)
+>!3::get_clip_item(-3)
+>!4::get_clip_item(-4)
+>!5::get_clip_item(-5)
+
 ; (Optional) Down cbimg.dll and put into blow dir, the if need (listen: when copy image => auto save into CLIP_IMG_DIR)
 ; the path can be replaced freely, as long as the path can be found;
 ; detail => clip_save_image() function
@@ -1150,6 +1163,19 @@ clip_file_2_listset(file_path){
                 file_ls.update(c)
     return file_ls
 }
+
+get_clip_item(index){
+    if not clip_buffer.Length
+        return
+    try result := clip_buffer[index]
+    if not strip(result)
+        return
+    A_Clipboard := ""
+    A_Clipboard := clip_buffer[index]
+    ClipWait
+    SendInput "^v"
+}
+
 ; _____________________________________________Define$
 
 ; _____________________________________________^Data Structure
