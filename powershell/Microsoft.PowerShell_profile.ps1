@@ -50,8 +50,8 @@ function new_mkdir {  # replace pwsh mkdir with busybox
 Set-Alias mkdir new_mkdir
 
 ########## Conda
-function get-conda { cmd.exe "/K" D:/miniconda/Scripts/activate.bat D:/miniconda }
-Set-Alias conda get-conda
+function into_conda { cmd.exe "/K" D:/miniconda/Scripts/activate.bat D:/miniconda}
+Set-Alias con into_conda
 
 ########## Command
 function cd_c{ cd c:/ }
