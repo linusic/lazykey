@@ -152,14 +152,14 @@ win_next(){
 #SuspendExempt False
 
 ; _____________________________________________________________________ 🧲🧲🧲 ChatGPT
->!CapsLock::
+<!CapsLock::
 {
-    callback := () => Run(python SCRIPT_ROOT_PATH "app\palm\main.py",, "hide")
-    toggle_window_vis("PaLM ahk_class TkTopLevel", callback)
+    callback := () => Run(python SCRIPT_ROOT_PATH "app\gemini\main.py",, "hide")
+    toggle_window_vis("Gemini ahk_class TkTopLevel", callback)
 }
 
 ; _____________________________________________________________________ 🧲🧲🧲 New Translator
-<!CapsLock::
+>!CapsLock::
 {
     callback := () => Run(python SCRIPT_ROOT_PATH "app\translator\main.py",, "hide")
     toggle_window_vis("Translator ahk_class TkTopLevel", callback)
@@ -189,7 +189,7 @@ win_next(){
 ; _____________________________________________________________________ 🧲🧲🧲 OCR
 >!\::
 {
-    Run python SCRIPT_ROOT_PATH "app\clipocr\main.py",, "hide"
+    Run "D:\miniconda\envs\clipocr\python.exe " SCRIPT_ROOT_PATH "app\clipocr\main.py",, "hide"
 }
 
 
@@ -458,7 +458,7 @@ alias_dos_keys := (
     '& doskey e = explorer.exe $* '
     '& doskey t = taskmgr '
     '& doskey c = clip.exe '
-    '& doskey conda = "cmd.exe "/K" D:/miniconda/Scripts/activate.bat D:/miniconda" '
+    '& doskey con = "cmd.exe "/K" D:/miniconda/Scripts/activate.bat D:/miniconda" '
     '& doskey clear = for /L %i in (1,1,100) do @echo. && echo. '
 )
 
@@ -834,7 +834,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 <!2::
 {
     callback := () => Run("E:\app\vlc\vlc.exe")
-    toggle_window_vis("ahk_exe vlc.exe ahk_class Qt5QWindowIcon", callback, ["Adjustments and Effects", "Current Media Information"])
+    toggle_window_vis("ahk_exe vlc.exe ahk_class Qt5QWindowIcon", callback, ["Adjustments and Effects", "Current Media Information", "VLC media player updates"])
 }
 #HotIf WinActive("ahk_exe vlc.exe")
 <!+2::Send("^l") ; toggle vlc playlist
