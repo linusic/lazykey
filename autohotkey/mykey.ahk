@@ -165,6 +165,13 @@ win_next(){
     toggle_window_vis("Translator ahk_class TkTopLevel", callback)
 }
 
+; _____________________________________________________________________ 🧲🧲🧲 M3U8 Downloader GUI
+!z::
+{
+    callback := () => Run(python SCRIPT_ROOT_PATH "app\m3u8_gui\main.py",, "hide")
+    toggle_window_vis("M3U8 ahk_class TkTopLevel", callback)
+}
+
 ; _____________________________________________________________________ 🧲🧲🧲 M3U8 Downloader
 +F1::
 {
@@ -207,6 +214,14 @@ lstrip(s){
 }
 rtrip(s){
     return RTrim(s, white_space)
+}
+startswith(string, prefix) {
+    return SubStr(string, 1, StrLen(prefix)) = prefix
+}
+endswith(string, suffix) {
+    string_len := StrLen(string)
+    suffix_len := StrLen(suffix)
+    return SubStr(string, string_len - suffix_len + 1, suffix_len) = suffix
 }
 copy_filenames_open_editor(){
     if not explorer_active()
@@ -514,12 +529,6 @@ open_cmd(open_mode:=0)
     }
 }
 
-; ^+e::
-; {
-;     condition_cmd := 'explorer.exe /select,'
-;     open_folder(condition_cmd, use_file:=true)
-; }
-
 ; _____________________________________________________________________ WinAPP
 #a::Run "appwiz.cpl"  ; ; App Remove
 ; #b::Run "::{645ff040-5081-101b-9f08-00aa002f954e}"  ; bin
@@ -542,8 +551,11 @@ open_cmd(open_mode:=0)
     ClipWait(2)
 
     ; if use explorer (must \ instead of /)
-    smart_path := StrReplace(A_Clipboard, "/", "\")
-    RUN("explorer " smart_path)
+    s := strip(A_Clipboard)
+    if startswith(s, "www")
+        s := "https://" s
+    smart_path := StrReplace(s, "/", "\")
+    RUN(Format('explorer "{1}"', smart_path))
 }
 
 ; _____________________________________________________________________ SHOW/HIDE DESKTOP ICON
@@ -733,7 +745,18 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:faip::Send("127.0.0.1")
 :X:faipip::Send("https://127.0.0.1")
 
+; for pwsh
 :X:fauni::Send("uni_str.encode('unicode-escape').decode('utf-8')")
+:X:fasort::Send("| & $HOME\scoop\shims\sort.exe -h")
+:X:fasortr::Send("| & $HOME\scoop\shims\sort.exe -hr")
+:X:fadu::Send("du -h | & $HOME\scoop\shims\sort.exe -h")
+:X:fadur::Send("du -h | & $HOME\scoop\shims\sort.exe -hr")
+
+:X:fati::send("00:00:00")
+:X:fara::send("00:00:00-00:00:00")                                 
+:X:fadt::send(FormatTime(A_Now, "yyyy-MM-dd"))                     
+
+
 
 ; for windows HARD PRESS
 :*x:tata::Run("taskmgr")
@@ -743,7 +766,6 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:famain::f(SCRIPT_ROOT_PATH "hotstr\main.py")
 :X:faclip::f(SCRIPT_ROOT_PATH "hotstr\clip.py")
 :X:fatask::f(SCRIPT_ROOT_PATH "hotstr\taskfind.py")                ; if taskfind can findstr
-:X:fadt::send(FormatTime(A_Now, "yyyy-MM-dd"))                     ; by AHK
 :X:fadate::f(SCRIPT_ROOT_PATH "hotstr\date.py")                    ; date (Bash)
 :X:fadatetime::f(SCRIPT_ROOT_PATH "hotstr\datetime.py")            ; datetime (python)
 :X:fatable::f(SCRIPT_ROOT_PATH "hotstr\table.py")                  ; datetable
@@ -780,6 +802,8 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:favoice::f(SCRIPT_ROOT_PATH "hotstr\voice.py")                  ; pyttsx3
 :X:fafast::f(SCRIPT_ROOT_PATH "hotstr\fastapi.py")                 ; fastapi main
 :X:fasub::f(SCRIPT_ROOT_PATH "hotstr\sub.py")                      ; sub renew
+:X:fafont::f(SCRIPT_ROOT_PATH "hotstr\font.py")                    ; font
+:X:fatab::f(SCRIPT_ROOT_PATH "hotstr\tab.py")                      ; tab
 
 
 
