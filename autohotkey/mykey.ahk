@@ -14,6 +14,10 @@ CLIP_ROOT_DIR := "E:\app\clipboard"
 APP_CONFIG_PATH := SCRIPT_ROOT_PATH "config\application.cfg"  ; #h
 APP_BACKGROUND_IMAGE_APP := SCRIPT_ROOT_PATH "image\bg.png"
 APP_BACKGROUND_IMAGE_FOLDER := SCRIPT_ROOT_PATH "image\bg.png"
+
+
+;;; Internet Options Hidtory (Win+R and ... Explorer History)
+; RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 1
 ; _____________________________________________________________________
 
 ; _____________________________________________________________________ Browser (Vimmum Tab)
@@ -42,6 +46,11 @@ TOGGLE_APP_DICT := Map()
 SendMode "Input"
 #Hotstring EndChars `t
 SetWinDelay -1   
+
+; CoordMode "Caret", "Window"
+; ; if for test , maybe change it to "Window"
+; CoordMode "Tooltip", "screen"
+
 
 ; 125%  1920x1080
 stable_dpi := 96
@@ -273,9 +282,43 @@ latest_image_path := ""
 #HotIf
 
 
-CoordMode "Caret", "Window"
-; if for test , maybe change it to "Window"
-CoordMode "Tooltip", "screen"
+menu_chain(hot_key, interval := 30){
+    Send "{RBUTTON}"
+    sleep interval
+    Send hot_key "{ENTER}"
+}
+; for browser cache: (chrome + edge)
+
+
+
+select_func_for_xbutton2(){ ; XButton2 + APPSKEY
+    switch {
+        case WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1"): menu_chain("{UP 4}")
+        case WinActive("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1"): menu_chain("{UP 6}")
+        case WinActive("ahk_exe sublime_text.exe"): open_folder('explorer.exe /select,', use_file:=true)
+        default: return
+    }  
+}
+
+APPSKEY::select_func_for_xbutton2 
+
+INSERT::
+{
+    switch {
+        case WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1"): copy_url_key := "{UP 3}"
+        case WinActive("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1"): copy_url_key := "{UP 4}"
+        default: return Send("{INSERT}")
+    }
+
+    A_Clipboard := ""
+    menu_chain(copy_url_key)
+    ClipWait(0.1)
+    if A_Clipboard {
+        cache_search_prefix := "https://webcache.googleusercontent.com/search?q=cache:"
+        cache_open_tab_cmd := Format("{1} {2}{3}", chrome_cmd_private,cache_search_prefix,A_Clipboard)
+        Run(cache_open_tab_cmd)
+    }
+}
 
 ; _____________________________________________________________________ Block All Menu for RALT
 ~RAlt::Send("^{SPACE}")
@@ -616,7 +659,7 @@ XButton2:: ; ↑
         ; ↓
         case (abs(x1-x2) < y2-y1) and (y2-y1 > allow_distance): Send("#v")
         ; ↑
-        case (abs(x1-x2) < y1-y2) and (y1-y2 > allow_distance): open_folder('explorer.exe /select,', use_file:=true)
+        case (abs(x1-x2) < y1-y2) and (y1-y2 > allow_distance): select_func_for_xbutton2()
         ; raw
         default: send("{XButton2}")
     }
