@@ -291,7 +291,7 @@ menu_chain(hot_key, interval := 30){
 
 
 
-select_func_for_xbutton2(){ ; XButton2 + APPSKEY
+select_func_for_xbutton2(){ ; XButton2, +z APPSKEY
     switch {
         case WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1"): menu_chain("{UP 4}")
         case WinActive("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1"): menu_chain("{UP 6}")
@@ -300,7 +300,8 @@ select_func_for_xbutton2(){ ; XButton2 + APPSKEY
     }  
 }
 
-APPSKEY::select_func_for_xbutton2 
+APPSKEY::
++z::select_func_for_xbutton2 
 
 INSERT::
 {
@@ -776,7 +777,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
     : hot_string
     SendInput(final_send_str)
 }
-:RX:fafp::escape_send_hotstring('print(f"{{}  =  {}}")', 9)
+:RX:fafp::escape_send_hotstring("print(f'{{}  =  {}}')", 9)
 :RX:fapip::escape_send_hotstring("pip install -q -U ", 18)
 :RX:fapipw::escape_send_hotstring("pip install -U    > nul", 16)
 :RX:fapipe::escape_send_hotstring("pip install -U    > nul 2>&1", 16)
@@ -784,6 +785,14 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 ::faff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a copy output.mp4 ; m3u8 => mp4: file '<file_path>' ;  / instead of \ if not ''
 ::fafff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a aac output.mp4
 ::faffft::ffmpeg -f concat -safe 0 -i input.txt -segment_time_metadata 1 -vf select=concatdec_select -af aselect=concatdec_select,aresample=async=1 output.mp4
+
+;;; audio is fast than video  <=> otherwise  1.5 => -1.5
+; ffmpeg -i output.mp4 -itsoffset 1.5 -i output.mp4 -map 0:v -map 1:a -c:v copy -c:a aac output_synced.mp4
+; ffmpeg -i 123.mp4 -ss 00:00:03 -t 00:00:02 -c:v copy -c:a copy output.mp4
+; ffmpeg -loop 1 -i input.png -t 180 -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v libx264 -pix_fmt yuv420p output.mp4
+; ffmpeg -i input.mp4 -vf "delogo=x=7:y=22:w=316:h=169:show=0, delogo=x=1591:y=871:w=318:h=169:show=0" -c:a copy ouput.mp4
+
+:X:faca::Send("https://webcache.googleusercontent.com/search?q=cache:")
 
 :X:faip::Send("127.0.0.1")
 :X:faipip::Send("https://127.0.0.1")
@@ -821,6 +830,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:famail::f(SCRIPT_ROOT_PATH "hotstr\mail.py")                    ; mail
 :X:fareq::f(SCRIPT_ROOT_PATH "hotstr\req.py")                      ; httpx simple
 :X:fareq2::f(SCRIPT_ROOT_PATH "hotstr\req2.py")                    ; httpx total
+:X:farange::f(SCRIPT_ROOT_PATH "hotstr\range.py")                  ; httpx range video
 :X:faproxy::f(SCRIPT_ROOT_PATH "hotstr\proxy.py")                  ; toggle winos proxy, and ALT & 3
 :X:fatext::f(SCRIPT_ROOT_PATH "hotstr\text.py")                    ; extract text from html
 :X:fawc::f(SCRIPT_ROOT_PATH "hotstr\wc.py")                        ; wordcloud
@@ -847,8 +857,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:fasub::f(SCRIPT_ROOT_PATH "hotstr\sub.py")                      ; sub renew
 :X:fafont::f(SCRIPT_ROOT_PATH "hotstr\font.py")                    ; font
 :X:fatab::f(SCRIPT_ROOT_PATH "hotstr\tab.py")                      ; tab
-
-
+:X:faitem::f(SCRIPT_ROOT_PATH "hotstr\item.py")                    ; itemgetter example
 
 ; ----------------- for rs
 :X:rsm::f(SCRIPT_ROOT_PATH "hotstr\rs\main.rs", "{UP}{TAB}")   ; main
