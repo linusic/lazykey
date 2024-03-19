@@ -18,6 +18,8 @@ APP_BACKGROUND_IMAGE_FOLDER := SCRIPT_ROOT_PATH "image\bg.png"
 
 ;;; Internet Options Hidtory (Win+R and ... Explorer History)
 ; RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 1
+;;; hiberfil.sys    => sleep
+; powercfg -h off
 ; _____________________________________________________________________
 
 ; _____________________________________________________________________ Browser (Vimmum Tab)
@@ -101,15 +103,24 @@ goto_path()
         return False
     }
 }
-cp_path()
+cp_path(is_return := 0)
 {
     if !goto_path()
         return
+
+    if is_return
+        A_Clipboard := ""
+
     Send("^a")
     Send("^c")
     Send("{ESC 2}")   ; twice for Explorer and Edge
+
+    if is_return
+        ClipWait(1)
+        return A_Clipboard
 }
 
+::fanote::{#}:~:text=    ;  {#} to escape char `#`
 ; _____________________________________________________________________ remap -> numbers
 ; Capslock & h::Send "0" ;
 ; Capslock & j::Send "1"
@@ -208,7 +219,19 @@ win_next(){
     Run "D:\miniconda\envs\clipocr\python.exe " SCRIPT_ROOT_PATH "app\clipocr\main.py",, "hide"
 }
 
-
+; _____________________________________________________________________ 🧲🧲🧲 WIFI
+:X:fawifiname::{
+    A_Clipboard := ""
+    Run(python SCRIPT_ROOT_PATH "tool\wifi.py name",, "Hide")
+    ClipWait(2)
+    Send("^v")
+}
+:X:fawifipwd::{
+    A_Clipboard := ""
+    Run(python SCRIPT_ROOT_PATH "tool\wifi.py pwd",, "Hide")
+    ClipWait(2)
+    Send("^v")
+}
 ; _____________________________________________________________________ 🧲🧲🧲 Bulk Rename Syntax
 +F2::copy_filenames_open_editor()
 !F2::Run python SCRIPT_ROOT_PATH "app\rename\bulk_rename.py",, "hide"
@@ -322,8 +345,9 @@ INSERT::
 }
 
 ; _____________________________________________________________________ Block All Menu for RALT
-~RAlt::Send("^{SPACE}")
->!SPACE::Send("{SPACE}") ; avoid block space
+; ~RAlt::Send("^{SPACE}")
+; >!space::Send("{SPACE 3}") ; avoid block space
+>!space::Send "^{space}"
 
 ; ~RAlt::Send "^{space}"       ; 🛑IME need open (Ctrl and Ctrl+Space) 💧 drop 4keys: #
 *#space::Send "{Ctrl}"     ; BLOCK => IME => ... + win + space
@@ -339,8 +363,8 @@ INSERT::
 <+p::Send "{WheelUp}"
 
 
-<!`;::Send "+{enter}"
->!`;::Send "!{enter}"
+>!`;::Send "+{enter}"
+<!`;::Send "^{enter}"
 ; [delete]
 <!o::Send "{backspace}"
 <!,::Send "^v"
@@ -455,7 +479,8 @@ LALT & 0::Send "{XButton2}"
 !m::Send "{esc}"
 <!/::Send "^f"
 
-LAlt & RAlt::Send "{esc}"
+LAlt & RAlt::Send "{enter}"
+RAlt & LAlt::Send "{enter}"
 #HotIf
 
 ;  _____________________________________________________________________ Toggle WinOS Proxy
@@ -531,7 +556,8 @@ choice_for_open_cmd(path, open_mode)
 
     ; cmd_base := 'cmd.exe /K {1}: && cd "{2}" ' alias_dos_keys
     ; /D (also skip driver)
-    cmd_base := 'cmd.exe /K cd /D {1} ' alias_dos_keys
+    ; cmd_base := 'cmd.exe /K cd /D {1} ' alias_dos_keys
+    cmd_base := 'cmd.exe /K cd /D {1} '
 
     ;  "echo.    => rep: \n
     cmd  := cmd_base " && for /L %i in (1,1,100) do @echo. && echo. "
@@ -782,9 +808,12 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :RX:fapipw::escape_send_hotstring("pip install -U    > nul", 16)
 :RX:fapipe::escape_send_hotstring("pip install -U    > nul 2>&1", 16)
 
+::faf::ffmpeg -f concat -safe 0 -i input.txt -c copy output.mp4 ; copy audio / video / ... all stream
 ::faff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a copy output.mp4 ; m3u8 => mp4: file '<file_path>' ;  / instead of \ if not ''
 ::fafff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a aac output.mp4
 ::faffft::ffmpeg -f concat -safe 0 -i input.txt -segment_time_metadata 1 -vf select=concatdec_select -af aselect=concatdec_select,aresample=async=1 output.mp4
+
+; ffmpeg -f concat -safe 0 -i input.txt -c:v libx264 -c:a aac output.mp4
 
 ;;; audio is fast than video  <=> otherwise  1.5 => -1.5
 ; ffmpeg -i output.mp4 -itsoffset 1.5 -i output.mp4 -map 0:v -map 1:a -c:v copy -c:a aac output_synced.mp4
@@ -858,7 +887,8 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:fafont::f(SCRIPT_ROOT_PATH "hotstr\font.py")                    ; font
 :X:fatab::f(SCRIPT_ROOT_PATH "hotstr\tab.py")                      ; tab
 :X:faitem::f(SCRIPT_ROOT_PATH "hotstr\item.py")                    ; itemgetter example
-
+:X:fasrt::f(SCRIPT_ROOT_PATH "hotstr\srt.py")                      ; srt
+:X:fapunycode::f(SCRIPT_ROOT_PATH "hotstr\punycode.py")            ; punycode
 ; ----------------- for rs
 :X:rsm::f(SCRIPT_ROOT_PATH "hotstr\rs\main.rs", "{UP}{TAB}")   ; main
 :X:rsmain::f(SCRIPT_ROOT_PATH "hotstr\rs\main.rs", "{UP}{TAB}")   ; main
