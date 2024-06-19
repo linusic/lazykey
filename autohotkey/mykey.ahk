@@ -156,6 +156,7 @@ win_next(){
 >!+k::
 <!WheelDown::win_next()
 
+>!l::Send("^g")
 
 ;;; jump and re-jump
 <!+s::Send "{F12}"  ; F12 is vsc
@@ -202,11 +203,19 @@ win_next(){
     }
 }
 ; _____________________________________________________________________ 🧲🧲🧲 Send Input
-; +F3::
 ~^+f::
 {
     if not explorer_active()
         return
+    IB := InputBox("🧲🧲🧲🧲🧲🧲Input", "🧲Send Input", "w900 h150")
+    if IB.Result != "Cancel" {
+        Send IB.Value
+    }
+}
+
+; _____________________________________________________________________ 🧲🧲🧲 Send Key
++F3::
+{
     IB := InputBox("🧲🧲🧲🧲🧲🧲Input", "🧲Send Input", "w900 h150")
     if IB.Result != "Cancel" {
         Send IB.Value
@@ -297,12 +306,12 @@ latest_image_path := ""
     Send("{F5}")
 }
 ; Command Palette for Chrome + Edge
-#HotIf WinActive("ahk_exe chrome.exe") ; Enbale "Quick Commands" => chrome://flags/
-^+p::Send "^{space}"
-#HotIf
-#HotIf WinActive("ahk_exe msedge.exe")
-^+p::Send "^q"
-#HotIf
+; #HotIf WinActive("ahk_exe chrome.exe") ; Enbale "Quick Commands" => chrome://flags/
+; ^+p::Send "^{space}"
+; #HotIf
+; #HotIf WinActive("ahk_exe msedge.exe")
+; ^+p::Send "^q"
+; #HotIf
 
 
 menu_chain(hot_key, interval := 30){
@@ -329,7 +338,7 @@ APPSKEY::
 INSERT::
 {
     switch {
-        case WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1"): copy_url_key := "{UP 3}"
+        case WinActive("ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1"): copy_url_key := "{UP 2}"
         case WinActive("ahk_exe msedge.exe ahk_class Chrome_WidgetWin_1"): copy_url_key := "{UP 4}"
         default: return Send("{INSERT}")
     }
@@ -820,6 +829,8 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 ; ffmpeg -i 123.mp4 -ss 00:00:03 -t 00:00:02 -c:v copy -c:a copy output.mp4
 ; ffmpeg -loop 1 -i input.png -t 180 -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v libx264 -pix_fmt yuv420p output.mp4
 ; ffmpeg -i input.mp4 -vf "delogo=x=7:y=22:w=316:h=169:show=0, delogo=x=1591:y=871:w=318:h=169:show=0" -c:a copy ouput.mp4
+; mp3 to mp4
+; ffmpeg -loop 1 -i "<img_name>.png" -i "<in_name>.mp3" -c:v libx264 -c:a copy -strict experimental -shortest "<out_name>.mp4"
 
 :X:faca::Send("https://webcache.googleusercontent.com/search?q=cache:")
 
@@ -830,7 +841,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:fauni::Send("uni_str.encode('unicode-escape').decode('utf-8')")
 :X:fasort::Send("| & $HOME\scoop\shims\sort.exe -h")
 :X:fasortr::Send("| & $HOME\scoop\shims\sort.exe -hr")
-:X:fadu::Send("du -h | & $HOME\scoop\shims\sort.exe -h")
+:X:fadu::Send(Format("du -h | {1} {2}", python, SCRIPT_ROOT_PATH "tool\sort.py"))
 :X:fadur::Send("du -h | & $HOME\scoop\shims\sort.exe -hr")
 
 :X:fati::send("00:00:00")
@@ -888,7 +899,8 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:fatab::f(SCRIPT_ROOT_PATH "hotstr\tab.py")                      ; tab
 :X:faitem::f(SCRIPT_ROOT_PATH "hotstr\item.py")                    ; itemgetter example
 :X:fasrt::f(SCRIPT_ROOT_PATH "hotstr\srt.py")                      ; srt
-:X:fapunycode::f(SCRIPT_ROOT_PATH "hotstr\punycode.py")            ; punycode
+:X:fapuny::f(SCRIPT_ROOT_PATH "hotstr\puny.py")                    ; puny
+
 ; ----------------- for rs
 :X:rsm::f(SCRIPT_ROOT_PATH "hotstr\rs\main.rs", "{UP}{TAB}")   ; main
 :X:rsmain::f(SCRIPT_ROOT_PATH "hotstr\rs\main.rs", "{UP}{TAB}")   ; main
@@ -909,12 +921,16 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:faarch1::f(SCRIPT_ROOT_PATH "app\m3u8\arch1_download.py") ; arch
 :X:faverge::f(SCRIPT_ROOT_PATH "tool\verge.py")   ; verge
 
+;;; exe
+:X:fatoc::Run(SCRIPT_ROOT_PATH "app\toc\toc.exe") ; toc
+
 ;;;;;;;;;;;;;;;;;;;;;;;; 🧱Tools For Python
 ; headers kv-pair string  =>  python-dict format
 #u::Run subl "D:\lin\dump-app\U-P\UP.md",, "Hide"
 #h::Run subl SCRIPT_ROOT_PATH "config\application.cfg"
 #j::Run python SCRIPT_ROOT_PATH "tool\headers_to_dict.py",, "Hide"
 #+j::Run python SCRIPT_ROOT_PATH "tool\json_format_mini.py",, "Hide"
+#m::Run subl SCRIPT_ROOT_PATH "hotstr\music.py"
 
 ; _____________________________________________________________________ 🧲🧲🧲 ^TOGGLE APP
 <!w::
@@ -1147,6 +1163,8 @@ clip_image_dll_path := A_SCRIPTDIR "\lib\cbimg\dll\cbimg.dll"   ; and special or
 
 
 ; _____________________________________________^Define(No need for modifications, unless customized)
+DEBOUNCE_INTERVAL := 5 ; 5ms (Half-OFF => 2 times but accuracy)
+
 screen_scale := A_ScreenDPI / 96 ; stable dpi
 screen_width := A_ScreenWidth / screen_scale
 screen_height := A_Screenheight / screen_scale
@@ -1522,7 +1540,7 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
     ;;; Edit
     search_edit := search_gui.AddEdit(Format("c09C0C5 +BackgroundBlack w{1} h{2}", width, edit_height))
     search_edit.setFont("s" edit_font_size)
-    search_edit.OnEvent("Change", __on_change)
+    search_edit.OnEvent("Change", debounce(__on_change, DEBOUNCE_INTERVAL))
     search_edit.OnNotify(-155, __lv_key_down)
     ;;; Button (Hide)
     search_gui.Add("Button", "Hidden Default", "OK").OnEvent("Click", __lv_or_edit_enter) ; for press ENTER
@@ -1558,6 +1576,29 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
         [sep_line_first_col, sep_line_second_col],
         ["IDEA", "https://github.com/linusic/lazykey/blob/main/autohotkey/mykey.ahk"],
     ]
+
+    debounce(fn, delay){
+        /* 
+            1. last once
+            2. refresh timer (close + setTimer)
+        */
+        close_delay := 0 ; timer in Other Lang
+        __inner(*){ ; must in ahk on...
+            ; if close_delay
+            ;     SetTimer fn, 0 ; 0 is close
+            ; close_delay := delay
+            SetTimer fn, -delay ; -<int> is once and (auto clear in AHK)
+        }
+        return __inner
+    }
+
+    throttle(fn, delay){
+        /* 
+            1. first once
+            2. lock timer(settimer + timer = "" (next event => auto for 'if not timer')
+        */
+    }
+
     __on_change(*){
         cur_input := StrLower(search_edit.Value)
         switch { ; pre easy match (all match -> return; beside HELP, all refresh)
