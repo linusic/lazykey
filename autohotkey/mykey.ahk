@@ -3,13 +3,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; _____________________________________________________________________
+PYTHON_PATH := "D:\miniconda\python.exe"
+SUBL_PATH := "D:\ide\Sublime\sublime_text.exe"
+CLIP_ROOT_DIR := "E:\app\clipboard"
+
 SCRIPT_ROOT_PATH := A_SCRIPTDIR "\"
 USER_PATH := "C:\Users\" A_UserName "\"
-
-PYTHON_PATH := "D:\python311\python.exe"
-SUBL_PATH := "D:\ide\Sublime\sublime_text.exe"
-
-CLIP_ROOT_DIR := "E:\app\clipboard"
 
 APP_CONFIG_PATH := SCRIPT_ROOT_PATH "config\application.cfg"  ; #h
 APP_BACKGROUND_IMAGE_APP := SCRIPT_ROOT_PATH "image\bg.png"
@@ -94,10 +93,12 @@ subl_in_explorer(){
 goto_path()
 {
     if WinActive("ahk_exe chrome.exe"){
-        Send("{F6}")
+        ; Send("{F6}") 
+        Send("^l") 
         return True
     }else if WinActive("ahk_exe msedge.exe") or WinActive("ahk_exe explorer.exe"){
-        Send("{F4}")
+        ; Send("{F4}")
+        Send("^l") 
         return True
     }else{ ; future ...
         return False
@@ -173,18 +174,18 @@ win_next(){
 #SuspendExempt False
 
 ; _____________________________________________________________________ 🧲🧲🧲 ChatGPT
-<!CapsLock::
-{
-    callback := () => Run(python SCRIPT_ROOT_PATH "app\gemini\main.py",, "hide")
-    toggle_window_vis("Gemini ahk_class TkTopLevel", callback)
-}
+; <!CapsLock::
+; {
+;     callback := () => Run(python SCRIPT_ROOT_PATH "app\gemini\main.py",, "hide")
+;     toggle_window_vis("Gemini ahk_class TkTopLevel", callback)
+; }
 
 ; _____________________________________________________________________ 🧲🧲🧲 New Translator
->!CapsLock::
-{
-    callback := () => Run(python SCRIPT_ROOT_PATH "app\translator\main.py",, "hide")
-    toggle_window_vis("Translator ahk_class TkTopLevel", callback)
-}
+; >!CapsLock::
+; {
+;     callback := () => Run(python SCRIPT_ROOT_PATH "app\translator\main.py",, "hide")
+;     toggle_window_vis("Translator ahk_class TkTopLevel", callback)
+; }
 
 ; _____________________________________________________________________ 🧲🧲🧲 M3U8 Downloader GUI
 !z::
@@ -253,7 +254,7 @@ strip(s){
 lstrip(s){
     return LTrim(s, white_space)
 }
-rtrip(s){
+rstrip(s){
     return RTrim(s, white_space)
 }
 startswith(string, prefix) {
@@ -285,26 +286,7 @@ explorer_path() {
 }
 
 
-latest_is_image_type := False
-latest_image_path := ""
-^+v::
-{
-    if !path := explorer_path()
-        return
 
-    if !latest_is_image_type and !strip(A_Clipboard)
-        return
-    
-    if latest_is_image_type and latest_image_path {
-        try FileCopy(latest_image_path, path, 0) ; not overwrite,  not change
-    } else {
-        __file_path := path "\" FormatTime(A_Now, "yyyyMMdd_HHmmss") ".txt"
-        if FileExist(__file_path)
-            FileDelete(__file_path)
-        FileAppend(A_Clipboard, __file_path, "UTF-8")  
-    }
-    Send("{F5}")
-}
 ; Command Palette for Chrome + Edge
 ; #HotIf WinActive("ahk_exe chrome.exe") ; Enbale "Quick Commands" => chrome://flags/
 ; ^+p::Send "^{space}"
@@ -419,6 +401,14 @@ INSERT::
 
 <+o::Send "^!{tab}"
 
+; move code in vsc
+CapsLock & p::Send "!{UP}"
+CapsLock & n::Send "!{DOWN}"
+; col select code in vsc
+^+!p::Send "^!{UP}"
+^+!n::Send "^!{DOWN}"
+
+
 ; _____________________________________________________________________ 🖱️ Replace Mouse
 ;;; 2:   =>(0,100) =>  (fast, lowest)
 ;;; "R"  => Relative
@@ -488,8 +478,8 @@ LALT & 0::Send "{XButton2}"
 !m::Send "{esc}"
 <!/::Send "^f"
 
-LAlt & RAlt::Send "{enter}"
-RAlt & LAlt::Send "{enter}"
+; LAlt & RAlt::Send "{enter}"
+; RAlt & LAlt::Send "{enter}"
 #HotIf
 
 ;  _____________________________________________________________________ Toggle WinOS Proxy
@@ -614,6 +604,7 @@ open_cmd(open_mode:=0)
 #i::Run "::{7007acc7-3202-11d1-aad2-00805fc1270e}"  ; ncpa.cpl
 #n::Run "Notepad.exe"
 #p::RUN "wt.exe powershell.exe " python             ; python console
+>!p::open_cmd(open_mode:=1)
 
 ; edit the select
 <+r::
@@ -791,6 +782,8 @@ f(file_name,callback_send:="",encoding:="UTF-8")
 :*x:fakecomment::fake_data("https://jsonplaceholder.typicode.com/comments") ; comment_id / postid / email / comment_name / commment_body
 :*x:fakephoto::fake_data("https://jsonplaceholder.typicode.com/photos")     ; album_id / postid / title / url / thumbnailUrl
 
+
+
 fake_data(fake_data_url){
     A_Clipboard := ""
     ; Run python "-c `"import httpx, pyperclip as p;result = httpx.get('https://jsonplaceholder.typicode.com/users').text;p.copy(result)`"",, "hide"
@@ -817,20 +810,8 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :RX:fapipw::escape_send_hotstring("pip install -U    > nul", 16)
 :RX:fapipe::escape_send_hotstring("pip install -U    > nul 2>&1", 16)
 
-::faf::ffmpeg -f concat -safe 0 -i input.txt -c copy output.mp4 ; copy audio / video / ... all stream
-::faff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a copy output.mp4 ; m3u8 => mp4: file '<file_path>' ;  / instead of \ if not ''
-::fafff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a aac output.mp4
-::faffft::ffmpeg -f concat -safe 0 -i input.txt -segment_time_metadata 1 -vf select=concatdec_select -af aselect=concatdec_select,aresample=async=1 output.mp4
-
-; ffmpeg -f concat -safe 0 -i input.txt -c:v libx264 -c:a aac output.mp4
-
-;;; audio is fast than video  <=> otherwise  1.5 => -1.5
-; ffmpeg -i output.mp4 -itsoffset 1.5 -i output.mp4 -map 0:v -map 1:a -c:v copy -c:a aac output_synced.mp4
-; ffmpeg -i 123.mp4 -ss 00:00:03 -t 00:00:02 -c:v copy -c:a copy output.mp4
-; ffmpeg -loop 1 -i input.png -t 180 -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v libx264 -pix_fmt yuv420p output.mp4
-; ffmpeg -i input.mp4 -vf "delogo=x=7:y=22:w=316:h=169:show=0, delogo=x=1591:y=871:w=318:h=169:show=0" -c:a copy ouput.mp4
-; mp3 to mp4
-; ffmpeg -loop 1 -i "<img_name>.png" -i "<in_name>.mp3" -c:v libx264 -c:a copy -strict experimental -shortest "<out_name>.mp4"
+; error  char: "+"
+; :RX:fahex::escape_send_hotstring("''.join(chr(int(<your_str>[i:i + 2], 16)) for i in range(0, len(hex_string), 2))", 16)
 
 :X:faca::Send("https://webcache.googleusercontent.com/search?q=cache:")
 
@@ -848,6 +829,36 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:fara::send("00:00:00-00:00:00")                                 
 :X:fadt::send(FormatTime(A_Now, "yyyy-MM-dd"))                     
 
+
+
+; ::fatg::tdl dl -u ; tdl for telegram
+::fatg::tdl dl --continue --reconnect-timeout 0 -u 
+
+
+::faf::ffmpeg -f concat -safe 0 -i input.txt -c copy output.mp4 ; copy audio / video / ... all stream
+::faff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a copy output.mp4 ; m3u8 => mp4: file '<file_path>' ;  / instead of \ if not ''
+::fafff::ffmpeg -f concat -safe 0 -i input.txt -c:v copy -c:a aac output.mp4
+::faffft::ffmpeg -f concat -safe 0 -i input.txt -segment_time_metadata 1 -vf select=concatdec_select -af aselect=concatdec_select,aresample=async=1 output.mp4
+; ;;; showcqt
+::facqt::ffmpeg -y -i "audio.mp3" -i "background.jpg" -filter_complex "[0:a]showcqt=s=1920x1080[v];[1:v]scale=1920:1080,format=rgba,colorchannelmixer=aa=0.2[bg];[v][bg]overlay=0:0[outv]" -map '[outv]' -map '0:a' -c:a copy "output.mp4"
+; ;;; image to mp4
+::faimage::ffmpeg -loop 1 -i "image.png" -i "input.mp3" -c:v libx264 -tune stillimage -c:a copy -pix_fmt yuv420p -shortest "output.mp4"
+::faiso::ffmpeg -i input_file.iso -c:v libx265 -c:a aac output_file.mp4
+
+;::famp4::ffmpeg -i input.mp3 -c:a copy -f mp4 -y output.mp4 ; mp3 to mp4
+::famp4::ffmpeg -i input.mp3 -i input.jpg -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+
+; ffmpeg -f concat -safe 0 -i input.txt -c:v libx264 -c:a aac output.mp4
+
+;;; audio is fast than video  <=> otherwise  1.5 => -1.5
+; ffmpeg -i output.mp4 -itsoffset 1.5 -i output.mp4 -map 0:v -map 1:a -c:v copy -c:a aac output_synced.mp4
+; ffmpeg -i 123.mp4 -ss 00:00:03 -t 00:00:02 -c:v copy -c:a copy output.mp4
+; ffmpeg -loop 1 -i input.png -t 180 -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v libx264 -pix_fmt yuv420p output.mp4
+; ffmpeg -i input.mp4 -vf "delogo=x=7:y=22:w=316:h=169:show=0, delogo=x=1591:y=871:w=318:h=169:show=0" -c:a copy ouput.mp4
+; mp3 to mp4
+; ffmpeg -loop 1 -i "<img_name>.png" -i "<in_name>.mp3" -c:v libx264 -c:a copy -strict experimental -shortest "<out_name>.mp4"
+
+::fawget::wget --mirror --convert-links --adjust-extension --page-requisites --no-parent https://example.com/docs/
 
 
 ; for windows HARD PRESS
@@ -900,7 +911,13 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 :X:faitem::f(SCRIPT_ROOT_PATH "hotstr\item.py")                    ; itemgetter example
 :X:fasrt::f(SCRIPT_ROOT_PATH "hotstr\srt.py")                      ; srt
 :X:fapuny::f(SCRIPT_ROOT_PATH "hotstr\puny.py")                    ; puny
-
+:X:facsv::f(SCRIPT_ROOT_PATH "hotstr\ytb_csv.py")                  ; ytb playlist csv
+:X:fapl::f(SCRIPT_ROOT_PATH "hotstr\ytb_pl.py")                    ; ytb playlist polars
+:X:fats::f(SCRIPT_ROOT_PATH "hotstr\ts.py")                        ; CODECS avc1 to TS
+:X:fahide::f(SCRIPT_ROOT_PATH "hotstr\hide.py")                    ; fake hide folder directory
+:X:famysql::f(SCRIPT_ROOT_PATH "hotstr\mysql.py")                  ; mysql redis mongo test
+:X:famongo::f(SCRIPT_ROOT_PATH "hotstr\mysql.py")                  ; mysql redis mongo test
+:X:faredis::f(SCRIPT_ROOT_PATH "hotstr\mysql.py")                  ; mysql redis mongo test
 ; ----------------- for rs
 :X:rsm::f(SCRIPT_ROOT_PATH "hotstr\rs\main.rs", "{UP}{TAB}")   ; main
 :X:rsmain::f(SCRIPT_ROOT_PATH "hotstr\rs\main.rs", "{UP}{TAB}")   ; main
@@ -928,6 +945,7 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 ; headers kv-pair string  =>  python-dict format
 #u::Run subl "D:\lin\dump-app\U-P\UP.md",, "Hide"
 #h::Run subl SCRIPT_ROOT_PATH "config\application.cfg"
+#t::Run subl "C:\tmp\input.txt"
 #j::Run python SCRIPT_ROOT_PATH "tool\headers_to_dict.py",, "Hide"
 #+j::Run python SCRIPT_ROOT_PATH "tool\json_format_mini.py",, "Hide"
 #m::Run subl SCRIPT_ROOT_PATH "hotstr\music.py"
@@ -966,10 +984,6 @@ escape_send_hotstring(hot_string, right_char_count:=0){
 #e::
 {
     toggle_window_vis("ahk_class CabinetWClass ahk_exe explorer.exe", open_explorer)
-}
-<!+3::
-{
-    open_explorer()
 }
 
 <!4::
@@ -1187,9 +1201,32 @@ clip_block_sep_prefix := clip_block_sep_suffix := "_____________________________
 clip_cell_sep := "___________"
 white_space := "`n`r`t "  ; include " "
 
+TOGGLE_APP_DICT := Map()
 clip_buffer := ListSet()
 clip_pin_buffer := clip_file_2_listset(CLIP_TEXT_PIN_FILE)
 __file_cache := ListSet()
+
+latest_is_image_type := False
+latest_image_path := ""
+^+v::
+{
+    if !path := explorer_path()
+        return
+
+    if !latest_is_image_type and !strip(A_Clipboard)
+        return
+    
+    if latest_is_image_type and latest_image_path {
+        try FileCopy(latest_image_path, path, 0) ; not overwrite,  not change
+    } else {
+        __file_path := path "\" FormatTime(A_Now, "yyyyMMdd_HHmmss") ".txt"
+        if FileExist(__file_path)
+            FileDelete(__file_path)
+        FileAppend(A_Clipboard, __file_path, "UTF-8")  
+    }
+    Send("{F5}")
+}
+
 ; OnExit: maybe intrusiveness (SetTimer for them if need)
 OnExit clip_buffer_2_file ; Include: Exit/Reload AHK => Auto flush memory to File (Just FileAppend: UTF-8)
 OnExit clip_pin_2_file
@@ -1222,24 +1259,24 @@ clip_save_image(sleep_ms:=0){
 
     img_file_name := FormatTime(A_Now, "yyyyMMdd_HHmmss")
     full_path := CLIP_ROOT_DIR "\images\" img_file_name ".jpg"
+    ; -------------------------------------------------------------
     ;;; some screenshot need sleep 1s, otherwise black bg.
     ; sleep sleep_ms ; 
-    mod_4_free := DllCall("LoadLibrary", "Str", clip_image_dll_path, "Ptr")
-    err := DllCall("cbimg\GetCBImage", "Str", full_path)
-
-    if not err
-        latest_image_path := full_path ; to sned !+v
-
+            ; mod_4_free := DllCall("LoadLibrary", "Str", clip_image_dll_path, "Ptr")
+            ; err := DllCall("cbimg\GetCBImage", "Str", full_path)
+            ; if not err
+            ;     latest_image_path := full_path ; to sned !+v
     ;;; ------------------------  check or notify if need
     ; if !Integer(err)
     ;     msgbox("saved into: " full_path)
     ;;; conserve memory if need
     ; DllCall("FreeLibrary", "Ptr", hModule)
+    ; -------------------------------------------------------------
     
     ;;; ------------------------ if use python instead of DLL
     ;;; 1. install python + ENG VAR. 2. install pillow module: pip install pillow
-    ; py_code := Format("from PIL import ImageGrab; ImageGrab.grabclipboard().save(r'{1}')", full_path)
-    ; Run(Format('{1} "{2}"', python_c, py_code),, "Hide")  ; python_c := python " -c "
+    py_code := Format("from PIL import ImageGrab; ImageGrab.grabclipboard().save(r'{1}')", full_path)
+    Run(Format('{1} "{2}"', python_c, py_code),, "Hide")  ; python_c := python " -c "
 }
 
 clip_buffer_2_file(*){
@@ -1516,6 +1553,7 @@ create_cliptoy_search_gui(search_gui_title, &__TOGGLE_CLIPTOY_VIS__){
     mode_2_title := Map()
     pin_blacklist_ls := ListSet(pin_buffer_sep, buffer_file_sep)
     ;;; Define Root GUI
+    ; ; +Owner avoids a taskbar button.
     ; search_gui:= Gui("-Resize -Caption -SysMenu -Parent -Theme -MaximizeBox -hideBox +ToolWindow +Owner", search_gui_title) ; -Parent (for hide)
     search_gui:= Gui("-Resize -Caption +ToolWindow +LastFound", search_gui_title) ; -Parent (for hide)
     ; search_gui:= Gui("", search_gui_title) ; -Parent (for hide)
