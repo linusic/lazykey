@@ -80,6 +80,9 @@
 	// fold_all  &  unfold_all
 	{ "keys": ["ctrl+alt+u"], "command": "fold_by_level", "args": {"level": 1} },
 	{ "keys": ["ctrl+alt+i"], "command": "unfold_all" },
+	// swap_line (vsc => ahk)
+	{ "keys": ["alt+up"], "command": "swap_line_up" },
+	{ "keys": ["alt+down"], "command": "swap_line_down" },
 
 	// fold & unfold
 	// { "keys": ["alt+shift+u"], "command": "fold" },
@@ -114,4 +117,6 @@
 	   "keys": ["ctrl+shift+a"], "command": "align_tab",
 	   "args": {"live_preview" : true}
 	},
+
+
 ]
